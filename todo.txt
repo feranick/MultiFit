@@ -1,0 +1,2 @@
+List only activated peaks.
+Streamline initial parameters.

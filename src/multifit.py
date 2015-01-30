@@ -1,4 +1,4 @@
-# Multifit v. 20150125a
+# Multifit v. 20150128a
 # Nicola Ferralis <feranick@hotmail.com>
 # The entire code is covered by GNU Public License (GPL) v.3
 
@@ -25,8 +25,10 @@ def main():
     summary = 'summary.txt'
 
     type = int(sys.argv[2])
-    #type = 0
+
+    fpeak4 = 0
     fpeak6 = 0
+
 
     if type==0:
         typec = "Lor"
@@ -64,57 +66,59 @@ def main():
     pars['p0_center'].set(1100)
     pars['p0_sigma'].set(45, min=40)
     pars['p0_amplitude'].set(500, min=0)
-    if type ==3:
-        pars['p0_fraction'].set(0.3, min = 0)
+    if type ==2:
+        pars['p0_fraction'].set(0.5, min = 0, max = 1)
 
     pars.update(peak1.make_params())
     pars['p1_center'].set(1250)
     pars['p1_sigma'].set(45, min=40)
     pars['p1_amplitude'].set(1000, min=0)
-    if type ==3:
-        pars['p1_fraction'].set(0.3, min = 0)
+    if type ==2:
+        pars['p1_fraction'].set(0.5, min = 0, max = 1)
 
     pars.update(peak2.make_params())
     pars['p2_center'].set(1330)
     pars['p2_sigma'].set(80, min=40)
     pars['p2_amplitude'].set(5000, min=0)
-    if type ==3:
-        pars['p2_fraction'].set(0.3, min = 0)
+    if type ==2:
+        pars['p2_fraction'].set(0.5, min = 0, max = 1)
 
     pars.update(peak3.make_params())
     pars['p3_center'].set(1420)
     pars['p3_sigma'].set(40, min=20)
     pars['p3_amplitude'].set(300, min=0)
-    if type ==3:
-        pars['p3_fraction'].set(0.3, min = 0)
+    if type ==2:
+        pars['p3_fraction'].set(0.5, min = 0, max = 1)
 
-    pars.update(peak4.make_params())
-    pars['p4_center'].set(1500)
-    pars['p4_sigma'].set(40, min=20)
-    pars['p4_amplitude'].set(300, min=0)
-    if type ==3:
-        pars['p4_fraction'].set(0.3, min = 0)
+    if fpeak4!=0:
+        pars.update(peak4.make_params())
+        pars['p4_center'].set(1500)
+        pars['p4_sigma'].set(40, min=20)
+        pars['p4_amplitude'].set(300, min=0)
+        if type ==2:
+            pars['p4_fraction'].set(0.5, min = 0, max = 1)
 
     pars.update(peak5.make_params())
     pars['p5_center'].set(1590)
     pars['p5_sigma'].set(40, min=20)
     pars['p5_amplitude'].set(2000, min=0)
-    if type ==3:
-        pars['p5_fraction'].set(0.3, min = 0)
+    if type ==2:
+        pars['p5_fraction'].set(0.5, min = 0, max = 1)
 
     if fpeak6!=0:
         pars.update(peak6.make_params())
         pars['p6_center'].set(1680)
         pars['p6_sigma'].set(40, min=30)
         pars['p6_amplitude'].set(1000, min=0)
-        if type ==3:
-            pars['p6_fraction'].set(0.3, min = 0)
+        if type ==2:
+            pars['p6_fraction'].set(0.5, min = 0, max = 1)
+
+    mod = peak0 + peak1 + peak2 + peak3 + peak5
 
     if fpeak6!=0:
-        mod = peak0 + peak1 + peak2 + peak3 + peak4 + peak5 + peak6
-    else:
-        mod = peak0 + peak1 + peak2 + peak3 + peak5
-
+        mod = mod + peak6
+    if fpeak4!=0:
+        mod = mod + peak4
 
 
     ########################################
@@ -136,13 +140,15 @@ def main():
 
     print('\nD5/G = {:f}'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
     print('(D4+D5)/G = {:f}'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']))
-    print('D1/G = {:f}\n'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude']))
+    print('D1/G = {:f}'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude']))
+    print('Fit type: {:}\n'.format(typec))
       
 
     with open(outfile, "a") as text_file:
         text_file.write('\nD5/G = {:f}'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
         text_file.write('\n(D4+D5)/G = {:f}'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']))
-        text_file.write('\nD1/G = {:f}\n'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude']))
+        text_file.write('\nD1/G = {:f}'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude']))
+        text_file.write('Fit type: {:}\n'.format(typec))
 
 
     if os.path.isfile(summary) == False:
@@ -177,11 +183,11 @@ def main():
 
 
     plt.plot(x,y0,'g')
-    plt.plot(x,y1,'g')
+    plt.plot(x,y1,'g',linewidth=2.0)
     plt.plot(x,y2,'g')
     plt.plot(x,y3,'g')
     plt.plot(x,y4,'g')
-    plt.plot(x,y5,'g')
+    plt.plot(x,y5,'g',linewidth=2.0)
     #plt.plot(x,y6,'g')
 
     ### add D5G values to plot
