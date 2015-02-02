@@ -1,4 +1,4 @@
-# Multifit v. 20150201b
+# Multifit v. 20150202a
 # Nicola Ferralis <feranick@hotmail.com>
 # The entire code is covered by GNU Public License (GPL) v.3
 
@@ -122,7 +122,7 @@ def calculate(file, type):
             text_file.write('\nD5/G = {:f}'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
             text_file.write('\n(D4+D5)/G = {:f}'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']))
             text_file.write('\nD1/G = {:f}'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude']))
-            text_file.write('Fit type: {:}\n'.format(self.typec))
+            text_file.write('Fit type: {:}\n'.format(p.typec))
 
 
     if os.path.isfile(summary) == False:
