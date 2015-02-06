@@ -1,4 +1,4 @@
-# Multifit v. 20150206a
+# Multifit v. 20150206b
 # Nicola Ferralis <feranick@hotmail.com>
 # The entire code is covered by GNU Public License (GPL) v.3
 
@@ -19,17 +19,18 @@ def calculate(file, type):
     fpeak =[1, 1, 1, 1, 0, 1, 0]
     
     ### Define the relevant parameters for each peak here.
+    
     ### D4
+    pc = [1100]     # Center
+    ps = [45]       # Sigma
+    ps_min = [40]   # Sigma minimum
+    pa = [500]      # Amplitde
+    pa_min = [0]    # Amplitde minimum
+    pf = [0.5]      # Factor (PseudoVoigt)
+    pf_min = [0]    # Full Gaussian
+    pf_max = [1]    # Full Lorentzian
 
-    pc = [1100]
-    ps = [45]
-    ps_min = [40]
-    pa = [500]
-    pa_min = [0]
-    pf = [0.5]
-    pf_min = [0]
-    pf_max = [1]
-
+    ### D5
     pc.extend([1250])
     ps.extend([45])
     ps_min.extend([40])
@@ -39,6 +40,7 @@ def calculate(file, type):
     pf_min.extend([0])
     pf_max.extend([1])
 
+    ### D1
     pc.extend([1330])
     ps.extend([80])
     ps_min.extend([40])
@@ -48,6 +50,7 @@ def calculate(file, type):
     pf_min.extend([0])
     pf_max.extend([1])
     
+    ### D3a
     pc.extend([1420])
     ps.extend([40])
     ps_min.extend([20])
@@ -57,6 +60,7 @@ def calculate(file, type):
     pf_min.extend([0])
     pf_max.extend([1])
     
+    ### D3b
     pc.extend([1500])
     ps.extend([40])
     ps_min.extend([20])
@@ -66,6 +70,7 @@ def calculate(file, type):
     pf_min.extend([0])
     pf_max.extend([1])
     
+    ### G
     pc.extend([1590])
     ps.extend([40])
     ps_min.extend([20])
@@ -75,6 +80,7 @@ def calculate(file, type):
     pf_min.extend([0])
     pf_max.extend([1])
     
+    ### D2
     pc.extend([1680])
     ps.extend([40])
     ps_min.extend([30])
