@@ -1,4 +1,4 @@
-# Multifit v. 20150202c
+# Multifit v. 20150206a
 # Nicola Ferralis <feranick@hotmail.com>
 # The entire code is covered by GNU Public License (GPL) v.3
 
@@ -20,65 +20,88 @@ def calculate(file, type):
     
     ### Define the relevant parameters for each peak here.
     ### D4
+
+    pc = [1100]
+    ps = [45]
+    ps_min = [40]
+    pa = [500]
+    pa_min = [0]
+    pf = [0.5]
+    pf_min = [0]
+    pf_max = [1]
+
+    pc.extend([1250])
+    ps.extend([45])
+    ps_min.extend([40])
+    pa.extend([1000])
+    pa_min.extend([0])
+    pf.extend([0.5])
+    pf_min.extend([0])
+    pf_max.extend([1])
+
+    pc.extend([1330])
+    ps.extend([80])
+    ps_min.extend([40])
+    pa.extend([5000])
+    pa_min.extend([0])
+    pf.extend([0.5])
+    pf_min.extend([0])
+    pf_max.extend([1])
+    
+    pc.extend([1420])
+    ps.extend([40])
+    ps_min.extend([20])
+    pa.extend([300])
+    pa_min.extend([0])
+    pf.extend([0.5])
+    pf_min.extend([0])
+    pf_max.extend([1])
+    
+    pc.extend([1500])
+    ps.extend([40])
+    ps_min.extend([20])
+    pa.extend([300])
+    pa_min.extend([0])
+    pf.extend([0.5])
+    pf_min.extend([0])
+    pf_max.extend([1])
+    
+    pc.extend([1590])
+    ps.extend([40])
+    ps_min.extend([20])
+    pa.extend([2000])
+    pa_min.extend([0])
+    pf.extend([0.5])
+    pf_min.extend([0])
+    pf_max.extend([1])
+    
+    pc.extend([1680])
+    ps.extend([40])
+    ps_min.extend([30])
+    pa.extend([1000])
+    pa_min.extend([0])
+    pf.extend([0.5])
+    pf_min.extend([0])
+    pf_max.extend([1])
+
+
     pars = p.peak[0].make_params()
-    pars['p0_center'].set(1100)
-    pars['p0_sigma'].set(45, min=40)
-    pars['p0_amplitude'].set(500, min=0)
+    pars['p0_center'].set(pc[0])
+    pars['p0_sigma'].set(ps[0], min=ps_min[0])
+    pars['p0_amplitude'].set(pa[0], min=ps_min[0])
     if type ==0:
-        pars['p0_fraction'].set(0.5, min = 0, max = 1)
+        pars['p0_fraction'].set(pf[0], min = pf_min[0], max = pf_max[0])
 
-    ### D5
-    if fpeak[1]!=0:
-        pars.update(p.peak[1].make_params())
-        pars['p1_center'].set(1250)
-        pars['p1_sigma'].set(45, min=40)
-        pars['p1_amplitude'].set(1000, min=0)
-        if type ==0:
-            pars['p1_fraction'].set(0.5, min = 0, max = 1)
-    ### D1
-    if fpeak[2]!=0:
-        pars.update(p.peak[2].make_params())
-        pars['p2_center'].set(1330)
-        pars['p2_sigma'].set(80, min=40)
-        pars['p2_amplitude'].set(5000, min=0)
-        if type ==0:
-            pars['p2_fraction'].set(0.5, min = 0, max = 1)
 
-    ### D3a
-    if fpeak[3]!=0:
-        pars.update(p.peak[3].make_params())
-        pars['p3_center'].set(1420)
-        pars['p3_sigma'].set(40, min=20)
-        pars['p3_amplitude'].set(300, min=0)
-        if type ==0:
-            pars['p3_fraction'].set(0.5, min = 0, max = 1)
+    for i in range (1, NumPeaks+1):
+        if fpeak[i]!=0:
+            pars.update(p.peak[i].make_params())
+            pars['p{:}_center'.format(str(i))].set(pc[i])
+            pars['p{:}_sigma'.format(str(i))].set(ps[i], min=ps_min[i])
+            pars['p{:}_amplitude'.format(str(i))].set(pa[i], min=pa_min[i])
+            if type ==0:
+                pars['p{:}_fraction'.format(str(i))].set(pf[0], min = pf_min[i], max = pf_max[i])
 
-    ### D3b
-    if fpeak[4]!=0:
-        pars.update(p.peak[4].make_params())
-        pars['p4_center'].set(1500)
-        pars['p4_sigma'].set(40, min=20)
-        pars['p4_amplitude'].set(300, min=0)
-        if type ==0:
-            pars['p4_fraction'].set(0.5, min = 0, max = 1)
-
-    ### G
-    if fpeak[5]!=0:
-        pars.update(p.peak[5].make_params())
-        pars['p5_center'].set(1590)
-        pars['p5_sigma'].set(40, min=20)
-        pars['p5_amplitude'].set(2000, min=0)
-        if type ==0:
-            pars['p5_fraction'].set(0.5, min = 0, max = 1)
-
-    ### D2
-    if fpeak[6]!=0:
-        pars.update(p.peak[6].make_params())
-        pars['p6_center'].set(1680)
-        pars['p6_sigma'].set(40, min=30)
-        pars['p6_amplitude'].set(1000, min=0)
-        if type ==0:
-            pars['p6_fraction'].set(0.5, min = 0, max = 1)
 
     ### Add relevant peak to fittong procedure.
     mod = p.peak[0]
