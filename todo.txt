@@ -1,2 +1,4 @@
-List only activated peaks.
-Streamline initial parameters.
+Polish handling of initial paramters
+Possibily save results in xlsx file.
+Streamline the naming of various files.
+
