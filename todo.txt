@@ -1,4 +1,3 @@
-Polish handling of initial paramters
-Possibily save results in xlsx file.
+Possibly save results in xlsx file.
 Streamline the naming of various files.
 
