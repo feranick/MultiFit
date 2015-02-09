@@ -8,7 +8,7 @@ python2.7 multifit.py n
 where n:
 
 0: PseudoVoigt
-1: Lorentzian
-2: Gaussian
+1: Gaussian
+2: Lorentzian
 
 Fitting parameters are initialized within thie multifit.py file.
