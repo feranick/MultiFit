@@ -1,4 +1,4 @@
-# Multifit v. 20150209a
+# Multifit
 # Nicola Ferralis <feranick@hotmail.com>
 # The entire code is covered by GNU Public License (GPL) v.3
 
@@ -8,8 +8,9 @@ from lmfit.models import GaussianModel, LorentzianModel, PseudoVoigtModel
 import matplotlib.pyplot as plt
 import sys, os.path, getopt
 
+version = '20150209b'
 ### Define number of total peaks
-global NumPeaks
+#global NumPeaks
 NumPeaks = 7
 
 def calculate(file, type):
@@ -24,8 +25,8 @@ def calculate(file, type):
 
     for row in sheet.iter_rows():
         for k in row:
-            inval.append(float(k.internal_value))
-    inv = resize(inval, [10, NumPeaks+1])
+            inval.append(k.internal_value)
+    inv = resize(inval, [14, NumPeaks+1])
 
     ### Use this to define qhich peak is active (NOTE: the first needs always to be 1)
     for i in range(1, NumPeaks+1):
@@ -33,20 +34,20 @@ def calculate(file, type):
 
     ### Initialize parameters for fit.
     pars = p.peak[0].make_params()
-    pars['p0_center'].set(inv[2,1])
-    pars['p0_sigma'].set(inv[3,1], min=inv[4,1])
-    pars['p0_amplitude'].set(inv[5,1], min=inv[6,1])
+    pars['p0_center'].set(inv[2,1], min = inv[3,1], max = inv[4,1] )
+    pars['p0_sigma'].set(inv[5,1], min = inv[6,1], max = inv [7,1])
+    pars['p0_amplitude'].set(inv[8,1], min=inv[9,1], max = inv[10,1])
     if type ==0:
-        pars['p0_fraction'].set(inv[7,1], min = inv[8,1], max = inv[9,1])
+        pars['p0_fraction'].set(inv[11,1], min = inv[12,1], max = inv[13,1])
 
     for i in range (1, NumPeaks):
         if fpeak[i]!=0:
             pars.update(p.peak[i].make_params())
-            pars['p{:}_center'.format(str(i))].set(inv[2,i+1])
-            pars['p{:}_sigma'.format(str(i))].set(inv[3,i+1], min=inv[4,i+1])
-            pars['p{:}_amplitude'.format(str(i))].set(inv[5,i+1], min=inv[6,i+1])
+            pars['p{:}_center'.format(str(i))].set(inv[2,i+1], min = inv[3,i+1], max = inv[4,i+1])
+            pars['p{:}_sigma'.format(str(i))].set(inv[5,i+1], min = inv[6,i+1], max = inv [7,i+1])
+            pars['p{:}_amplitude'.format(str(i))].set(inv[8,i+1], min=inv[9,i+1], max = inv[10,i+1])
             if type ==0:
-                pars['p{:}_fraction'.format(str(i))].set(inv[7,i+1], min = inv[8,i+1], max = inv[9,i+1])
+                pars['p{:}_fraction'.format(str(i))].set(inv[11,i+1], min = inv[12,i+1], max = inv[13,i+1])
 
     ### Add relevant peak to fitting procedure.
     mod = p.peak[0]
@@ -142,6 +143,10 @@ def calculate(file, type):
 ###################
 
 def main():
+    print('\n******************************')
+    print(' MultiFit v.' + version)
+    print('******************************\n')
+
     try:
         opts, args = getopt.getopt(sys.argv[1:], "ho:v", ["help", "output="])
     except getopt.GetoptError:
