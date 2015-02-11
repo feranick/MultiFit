@@ -8,7 +8,7 @@ from lmfit.models import GaussianModel, LorentzianModel, PseudoVoigtModel
 import matplotlib.pyplot as plt
 import sys, os.path, getopt
 
-version = '20150209b'
+version = '20150210a'
 ### Define number of total peaks
 #global NumPeaks
 NumPeaks = 7
@@ -20,7 +20,7 @@ def calculate(file, type):
     ### Load initialization parameters from xlsx file.
     
     W = px.load_workbook('input_parameters.xlsx', use_iterators = True)
-    sheet = W.get_sheet_by_name(name = 'Sheet1')
+    sheet = W.active
     inval=[]
 
     for row in sheet.iter_rows():
@@ -76,7 +76,8 @@ def calculate(file, type):
     ### Save individual fitting results
     outfile = 'fit_' + file
     ### Save summary fitting results
-    summary = 'summary.txt'
+    #summary = 'summary.txt'
+    summary = 'summary.xlsx'
     if os.path.isfile(summary) == False:
         header = True
     else:
@@ -98,6 +99,8 @@ def calculate(file, type):
                 text_file.write('\nG %Gaussian: {:f}'.format(out.best_values['p5_fraction']))
             text_file.write('\nFit type: {:}\n'.format(p.typec))
 
+        '''
+        ### Use this for summary in ASCII
         with open(summary, "a") as sum_file:
             if header == True:
                 sum_file.write('File\tiD1\tiD4\tiD5\tiG\twG\tD5G\t(D4+D5)/G\tD1/G\t%Gaussian\tfit\n')
@@ -115,6 +118,35 @@ def calculate(file, type):
             else:
                 sum_file.write('{:}\t'.format(type-1))
             sum_file.write('{:}\n'.format(p.typec))
+        '''
+
+        ### Use this for summary in XLSX
+        if header == True:
+            WW=px.Workbook()
+            pp=WW.active
+            pp.title='Summary'
+            summaryHeader = ['File', 'iD1', 'iD4', 'iD5', 'iG', 'wG', 'D5G', '(D4+D5)/G', 'D1/G', '%Gaussian', 'Fit']
+            pp.append(summaryHeader)
+            WW.save(summary)
+
+        WW = px.load_workbook(summary)
+        pp = WW.active
+
+        summaryResults = ['{:}'.format(file), '{:f}'.format(out.best_values['p2_amplitude']), \
+                          '{:f}'.format(out.best_values['p0_amplitude']),
+                          '{:f}'.format(out.best_values['p1_amplitude']), \
+                          '{:f}'.format(out.best_values['p5_amplitude']), \
+                          '{:f}'.format(out.best_values['p5_sigma']*2), \
+                          '{:f}'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']), \
+                          '{:f}'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']), \
+                          '{:f}'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude'])]
+        if type ==0:
+            summaryResults.extend(['{:f}'.format(out.best_values['p5_fraction'])])
+        else:
+            summaryResults.extend(['{:}'.format(type-1)])
+        summaryResults.extend([p.typec])
+        pp.append(summaryResults)
+        WW.save(summary)
 
     ### Plot optimal fit and individial components
     ax.plot(x, out.best_fit, 'r-', label='fit')
