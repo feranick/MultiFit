@@ -8,7 +8,7 @@ from lmfit.models import GaussianModel, LorentzianModel, PseudoVoigtModel
 import matplotlib.pyplot as plt
 import sys, os.path, getopt
 
-version = '20150210a'
+version = '20150213a'
 ### Define number of total peaks
 #global NumPeaks
 NumPeaks = 7
@@ -125,7 +125,7 @@ def calculate(file, type):
             WW=px.Workbook()
             pp=WW.active
             pp.title='Summary'
-            summaryHeader = ['File', 'iD1', 'iD4', 'iD5', 'iG', 'wG', 'D5G', '(D4+D5)/G', 'D1/G', '%Gaussian', 'Fit']
+            summaryHeader = ['File', 'iD1', 'iD4', 'iD5', 'iG', 'wG', 'D5G', '(D4+D5)/G', 'D1/G', 'D5 %Gaussian','D1 %Gaussian', 'G %Gaussian', 'Fit']
             pp.append(summaryHeader)
             WW.save(summary)
 
@@ -141,9 +141,11 @@ def calculate(file, type):
                           '{:f}'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']), \
                           '{:f}'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude'])]
         if type ==0:
-            summaryResults.extend(['{:f}'.format(out.best_values['p5_fraction'])])
+            summaryResults.extend(['{:f}'.format(out.best_values['p1_fraction']), \
+                                   '{:f}'.format(out.best_values['p2_fraction']), \
+                                   '{:f}'.format(out.best_values['p5_fraction'])])
         else:
-            summaryResults.extend(['{:}'.format(type-1)])
+            summaryResults.extend(['{:}'.format(type-1), '{:}'.format(type-1), '{:}'.format(type-1)])
         summaryResults.extend([p.typec])
         pp.append(summaryResults)
         WW.save(summary)
