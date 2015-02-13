@@ -8,7 +8,7 @@ from lmfit.models import GaussianModel, LorentzianModel, PseudoVoigtModel
 import matplotlib.pyplot as plt
 import sys, os.path, getopt
 
-version = '20150213b'
+version = '20150213c'
 ### Define number of total peaks
 #global NumPeaks
 NumPeaks = 7
@@ -73,11 +73,12 @@ def calculate(file, type):
     print(' Done! \n')
     print(out.fit_report(min_correl=0.25))
 
-    ### Save individual fitting results
-    outfile = 'fit_' + file
-    ### Save summary fitting results
-    #summary = 'summary.txt'
-    summary = 'summary.xlsx'
+    ### Output file names.
+    outfile = 'fit_' + file         # Save individual fitting results
+    plotfile = os.path.splitext(file)[0] + '_fit.png'   # Save plot as image
+    #summary = 'summary.txt'        # Save summary fitting results (ASCII)
+    summary = 'summary.xlsx'        # Save summary fitting results (Excel)
+
     if os.path.isfile(summary) == False:
         header = True
     else:
@@ -177,6 +178,7 @@ def calculate(file, type):
     plt.legend()
     plt.grid(True)
     print('*** Close plot to quit ***\n')
+    plt.savefig(plotfile)
     plt.show()
 
 
