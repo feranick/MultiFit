@@ -8,11 +8,12 @@ from lmfit.models import GaussianModel, LorentzianModel, PseudoVoigtModel
 import matplotlib.pyplot as plt
 import sys, os.path, getopt, glob
 
-version = '20150213h'
-### Define number of total peaks
-NumPeaks = 7
-### Save results as ASCII?
-ascii = False
+class defPar:
+    version = '20150213i'
+    ### Define number of total peaks
+    NumPeaks = 7
+    ### Save results as ASCII?
+    ascii = False
 
 def calculate(file, type, showplot):
     p = Peak(type)
@@ -27,10 +28,10 @@ def calculate(file, type, showplot):
     for row in sheet.iter_rows():
         for k in row:
             inval.append(k.internal_value)
-    inv = resize(inval, [14, NumPeaks+1])
+    inv = resize(inval, [14, defPar.NumPeaks+1])
 
     ### Use this to define qhich peak is active (NOTE: the first needs always to be 1)
-    for i in range(1, NumPeaks+1):
+    for i in range(1, defPar.NumPeaks+1):
         fpeak.extend([int(inv[1,i])])
 
     ### Initialize parameters for fit.
@@ -41,7 +42,7 @@ def calculate(file, type, showplot):
     if type ==0:
         pars['p0_fraction'].set(inv[11,1], min = inv[12,1], max = inv[13,1])
 
-    for i in range (1, NumPeaks):
+    for i in range (1, defPar.NumPeaks):
         if fpeak[i]!=0:
             pars.update(p.peak[i].make_params())
             pars['p{:}_center'.format(str(i))].set(inv[2,i+1], min = inv[3,i+1], max = inv[4,i+1])
@@ -52,7 +53,7 @@ def calculate(file, type, showplot):
 
     ### Add relevant peak to fitting procedure.
     mod = p.peak[0]
-    for i in range (1,NumPeaks):
+    for i in range (1,defPar.NumPeaks):
         if fpeak[i]!=0:
             mod = mod + p.peak[i]
 
@@ -79,7 +80,7 @@ def calculate(file, type, showplot):
     outfile = 'fit_' + file         # Save individual fitting results
     plotfile = os.path.splitext(file)[0] + '_fit.png'   # Save plot as image
 
-    if(ascii == True):
+    if(defPar.ascii == True):
         summary = 'summary.txt'        # Save summary fitting results (ASCII)
     else:
         summary = 'summary.xlsx'        # Save summary fitting results (Excel)
@@ -114,7 +115,7 @@ def calculate(file, type, showplot):
         '''
 
         ### Use this for summary in ASCII
-        if(ascii == True):
+        if(defPar.ascii == True):
             with open(summary, "a") as sum_file:
                 if header == True:
                     sum_file.write('File\tiD1\tiD4\tiD5\tiG\twG\tD5G\t(D4+D5)/G\tD1/G\t%Gaussian\tfit\tChi-square\tred-chi-sq\n')
@@ -176,8 +177,8 @@ def calculate(file, type, showplot):
     ax.plot(x, out.best_fit, 'r-', label='fit')
     y0 = p.peak[0].eval(x = x, **out.best_values)
     ax.plot(x,y0,'g')
-    y = [None]*(NumPeaks + 1)
-    for i in range (1,NumPeaks):
+    y = [None]*(defPar.NumPeaks + 1)
+    for i in range (1,defPar.NumPeaks):
         if (fpeak[i] ==1):
             y[i] = p.peak[i].eval(x = x, **out.best_values)
             if (i==1 or i==5):
@@ -202,7 +203,7 @@ def calculate(file, type, showplot):
 
 def main():
     print('\n******************************')
-    print(' MultiFit v.' + version)
+    print(' MultiFit v.' + defPar.version)
     print('******************************\n')
 
     try:
@@ -237,19 +238,19 @@ class Peak:
     ### Define the typology of the peak
     def __init__(self, type):
         
-        self.peak= [None]*(NumPeaks)
+        self.peak= [None]*(defPar.NumPeaks)
         
         if type==0:
-            for i in range (0,NumPeaks):
+            for i in range (0,defPar.NumPeaks):
                 self.peak[i] = PseudoVoigtModel(prefix="p"+ str(i) +"_")
             self.typec = "PVoigt"
         else:
             if type == 1:
-                for i in range (0,NumPeaks):
+                for i in range (0,defPar.NumPeaks):
                     self.peak[i] = GaussianModel(prefix="p"+ str(i) +"_")
                 self.typec = "Gauss"
             else:
-                for i in range (0,NumPeaks):
+                for i in range (0,defPar.NumPeaks):
                     self.peak[i] = LorentzianModel(prefix="p"+ str(i) +"_")
                 self.typec = "Lorentz"
 
