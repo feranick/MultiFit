@@ -11,4 +11,5 @@ where n:
 1: Gaussian
 2: Lorentzian
 
-Fitting parameters are initialized within thie multifit.py file.
+Fitting parameters are initialized within the
+"input_parameters.xlsx" Excel file.
