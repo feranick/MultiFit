@@ -6,15 +6,15 @@ import openpyxl as px
 from numpy import *
 from lmfit.models import GaussianModel, LorentzianModel, PseudoVoigtModel
 import matplotlib.pyplot as plt
-import sys, os.path, getopt
+import sys, os.path, getopt, glob
 
-version = '20150213f'
+version = '20150213h'
 ### Define number of total peaks
 NumPeaks = 7
 ### Save results as ASCII?
 ascii = False
 
-def calculate(file, type):
+def calculate(file, type, showplot):
     p = Peak(type)
     fpeak = []
     
@@ -69,7 +69,8 @@ def calculate(file, type):
     ax.plot(x, init, 'k--', label='initial')
 
     ### Perform fitting and display report
-    print(' Running Fit...')
+    print('\n************************************************************')
+    print(' Running fit on file: ' + file)
     out = mod.fit(y, pars,x=x)
     print(' Done! \n')
     print(out.fit_report(min_correl=0.25))
@@ -191,9 +192,10 @@ def calculate(file, type):
     plt.ylabel('Intensity [arb. units]')
     plt.legend()
     plt.grid(True)
-    print('*** Close plot to quit ***\n')
     plt.savefig(plotfile)
-    plt.show()
+    if(showplot == True):
+        print('*** Close plot to quit ***\n')
+        plt.show()
 
 
 ###################
@@ -204,17 +206,32 @@ def main():
     print('******************************\n')
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "ho:v", ["help", "output="])
+        opts, args = getopt.getopt(sys.argv[1:], "bfth:", ["batch", "file", "type", "help"])
     except getopt.GetoptError:
         # print help information and exit:
         usage()
         sys.exit(2)
-    
-    #file = 'PPRG-498_DG_fit_5.txt'
-    file = str(sys.argv[1])
-    type = int(sys.argv[2])
 
-    calculate(file, type)
+    for o, a in opts:
+        if o in ("-b" , "--batch"):
+            for f in glob.glob('*.txt'):
+                if (f != 'summary.txt'):
+                    type = int(sys.argv[2])
+                    calculate(f, type, False)
+        elif o in ("-f", "--file"):
+            file = str(sys.argv[2])
+            type = int(sys.argv[3])
+            calculate(file, type, True)
+        else:
+            usage()
+            sys.exit(2)
+
+def usage():
+    print('Usage: \n\n Single file:')
+    print(' python multifit.py -f filename n\n')
+    print(' Batch:')
+    print(' python multifit.py -b n\n')
+    print(' n = 0: PseudoVoigt 1: Gaussian 2: Lorentzian\n')
 
 class Peak:
     ### Define the typology of the peak

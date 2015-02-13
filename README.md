@@ -1,9 +1,13 @@
 # MultiFit
 Software for multipeak fitting Raman Spectra of Carbon Materials
 
-To run:
+Usage (note the corerct use of flags): 
 
-python2.7 multifit.py n
+For single file: 
+python multifit.py -f filename n
+
+For batch fitting:
+python multifit.py -b n
 
 where n:
 
