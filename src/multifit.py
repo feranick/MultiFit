@@ -8,10 +8,11 @@ from lmfit.models import GaussianModel, LorentzianModel, PseudoVoigtModel
 import matplotlib.pyplot as plt
 import sys, os.path, getopt
 
-version = '20150213e'
+version = '20150213f'
 ### Define number of total peaks
-#global NumPeaks
 NumPeaks = 7
+### Save results as ASCII?
+ascii = False
 
 def calculate(file, type):
     p = Peak(type)
@@ -76,8 +77,11 @@ def calculate(file, type):
     ### Output file names.
     outfile = 'fit_' + file         # Save individual fitting results
     plotfile = os.path.splitext(file)[0] + '_fit.png'   # Save plot as image
-    #summary = 'summary.txt'        # Save summary fitting results (ASCII)
-    summary = 'summary.xlsx'        # Save summary fitting results (Excel)
+
+    if(ascii == True):
+        summary = 'summary.txt'        # Save summary fitting results (ASCII)
+    else:
+        summary = 'summary.xlsx'        # Save summary fitting results (Excel)
 
     if os.path.isfile(summary) == False:
         header = True
@@ -109,64 +113,63 @@ def calculate(file, type):
         '''
 
         ### Use this for summary in ASCII
-        '''
-        with open(summary, "a") as sum_file:
-            if header == True:
-                sum_file.write('File\tiD1\tiD4\tiD5\tiG\twG\tD5G\t(D4+D5)/G\tD1/G\t%Gaussian\tfit\tChi-square\tred-chi-sq\n')
-            sum_file.write('{:}\t'.format(file))
-            sum_file.write('{:f}\t'.format(out.best_values['p2_amplitude']))
-            sum_file.write('{:f}\t'.format(out.best_values['p0_amplitude']))
-            sum_file.write('{:f}\t'.format(out.best_values['p1_amplitude']))
-            sum_file.write('{:f}\t'.format(out.best_values['p5_amplitude']))
-            sum_file.write('{:f}\t'.format(out.best_values['p5_sigma']*2))
-            sum_file.write('{:f}\t'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
-            sum_file.write('{:f}\t'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']))
-            sum_file.write('{:f}\t'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude']))
-            if type ==0:
-                sum_file.write('{:f}\t'.format(out.best_values['p1_fraction']))
-                sum_file.write('{:f}\t'.format(out.best_values['p2_fraction']))
-                sum_file.write('{:f}\t'.format(out.best_values['p5_fraction']))
-            else:
-                for i in range(0,3):
-                    sum_file.write('{:}\t'.format(type-1))
-            sum_file.write('{:}\t'.format(p.typec))
-            sum_file.write('{:}\t'.format(out.chisqr))
-            sum_file.write('{:}\n'.format(out.redchi))
-        '''
-
+        if(ascii == True):
+            with open(summary, "a") as sum_file:
+                if header == True:
+                    sum_file.write('File\tiD1\tiD4\tiD5\tiG\twG\tD5G\t(D4+D5)/G\tD1/G\t%Gaussian\tfit\tChi-square\tred-chi-sq\n')
+                sum_file.write('{:}\t'.format(file))
+                sum_file.write('{:f}\t'.format(out.best_values['p2_amplitude']))
+                sum_file.write('{:f}\t'.format(out.best_values['p0_amplitude']))
+                sum_file.write('{:f}\t'.format(out.best_values['p1_amplitude']))
+                sum_file.write('{:f}\t'.format(out.best_values['p5_amplitude']))
+                sum_file.write('{:f}\t'.format(out.best_values['p5_sigma']*2))
+                sum_file.write('{:f}\t'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
+                sum_file.write('{:f}\t'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']))
+                sum_file.write('{:f}\t'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude']))
+                if type ==0:
+                    sum_file.write('{:f}\t'.format(out.best_values['p1_fraction']))
+                    sum_file.write('{:f}\t'.format(out.best_values['p2_fraction']))
+                    sum_file.write('{:f}\t'.format(out.best_values['p5_fraction']))
+                else:
+                    for i in range(0,3):
+                        sum_file.write('{:}\t'.format(type-1))
+                sum_file.write('{:}\t'.format(p.typec))
+                sum_file.write('{:}\t'.format(out.chisqr))
+                sum_file.write('{:}\n'.format(out.redchi))
 
         ### Use this for summary in XLSX
-        if header == True:
-            WW=px.Workbook()
-            pp=WW.active
-            pp.title='Summary'
-            summaryHeader = ['File', 'iD1', 'iD4', 'iD5', 'iG', 'wG', 'D5G', '(D4+D5)/G', \
-                             'D1/G', 'D5 %Gaussian','D1 %Gaussian', 'G %Gaussian', 'Fit', \
-                             'Chi-square', 'Reduced Chi-square']
-            pp.append(summaryHeader)
-            WW.save(summary)
-
-        WW = px.load_workbook(summary)
-        pp = WW.active
-
-        summaryResults = ['{:}'.format(file), '{:f}'.format(out.best_values['p2_amplitude']), \
-                          '{:f}'.format(out.best_values['p0_amplitude']),
-                          '{:f}'.format(out.best_values['p1_amplitude']), \
-                          '{:f}'.format(out.best_values['p5_amplitude']), \
-                          '{:f}'.format(out.best_values['p5_sigma']*2), \
-                          '{:f}'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']), \
-                          '{:f}'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']), \
-                          '{:f}'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude'])]
-        if type ==0:
-            summaryResults.extend(['{:f}'.format(out.best_values['p1_fraction']), \
-                                   '{:f}'.format(out.best_values['p2_fraction']), \
-                                   '{:f}'.format(out.best_values['p5_fraction'])])
         else:
-            summaryResults.extend(['{:}'.format(type-1), '{:}'.format(type-1), '{:}'.format(type-1)])
-        summaryResults.extend([p.typec])
-        summaryResults.extend(['{:f}'.format(out.chisqr), '{:f}'.format(out.redchi)])
-        pp.append(summaryResults)
-        WW.save(summary)
+            if header == True:
+                WW=px.Workbook()
+                pp=WW.active
+                pp.title='Summary'
+                summaryHeader = ['File', 'iD1', 'iD4', 'iD5', 'iG', 'wG', 'D5G', '(D4+D5)/G', \
+                                 'D1/G', 'D5 %Gaussian','D1 %Gaussian', 'G %Gaussian', 'Fit', \
+                                 'Chi-square', 'Reduced Chi-square']
+                pp.append(summaryHeader)
+                WW.save(summary)
+
+            WW = px.load_workbook(summary)
+            pp = WW.active
+
+            summaryResults = ['{:}'.format(file), '{:f}'.format(out.best_values['p2_amplitude']), \
+                              '{:f}'.format(out.best_values['p0_amplitude']),
+                              '{:f}'.format(out.best_values['p1_amplitude']), \
+                              '{:f}'.format(out.best_values['p5_amplitude']), \
+                              '{:f}'.format(out.best_values['p5_sigma']*2), \
+                              '{:f}'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']), \
+                              '{:f}'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']), \
+                              '{:f}'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude'])]
+            if type ==0:
+                summaryResults.extend(['{:f}'.format(out.best_values['p1_fraction']), \
+                                       '{:f}'.format(out.best_values['p2_fraction']), \
+                                       '{:f}'.format(out.best_values['p5_fraction'])])
+            else:
+                summaryResults.extend(['{:}'.format(type-1), '{:}'.format(type-1), '{:}'.format(type-1)])
+            summaryResults.extend([p.typec])
+            summaryResults.extend(['{:f}'.format(out.chisqr), '{:f}'.format(out.redchi)])
+            pp.append(summaryResults)
+            WW.save(summary)
 
     ### Plot optimal fit and individial components
     ax.plot(x, out.best_fit, 'r-', label='fit')
