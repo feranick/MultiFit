@@ -8,7 +8,7 @@ from lmfit.models import GaussianModel, LorentzianModel, PseudoVoigtModel
 import matplotlib.pyplot as plt
 import sys, os.path, getopt
 
-version = '20150213c'
+version = '20150213e'
 ### Define number of total peaks
 #global NumPeaks
 NumPeaks = 7
@@ -84,13 +84,16 @@ def calculate(file, type):
     else:
         header = False
 
+        print('\nFit successful: ' + str(out.success))
     if (fpeak[1] == 1 & fpeak[2] == 1 & fpeak[5] == 1):
-        print('\nD5/G = {:f}'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
+        print('D5/G = {:f}'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
         print('(D4+D5)/G = {:f}'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']))
         print('D1/G = {:f}'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude']))
         if type ==0:
             print('G: {:f}% Gaussian'.format(out.best_values['p5_fraction']*100))
-        print('Fit type: {:}\n'.format(p.typec))
+        print('Fit type: {:}'.format(p.typec))
+        print('Chi-square: {:}'.format(out.chisqr))
+        print('Reduced Chi-square: {:}\n'.format(out.redchi))
 
         ### Uncomment to enable saving results of each fit in a separate file.
         '''
@@ -100,14 +103,16 @@ def calculate(file, type):
             text_file.write('\nD1/G = {:f}'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude']))
             if type ==0:
                 text_file.write('\nG %Gaussian: {:f}'.format(out.best_values['p5_fraction']))
-            text_file.write('\nFit type: {:}\n'.format(p.typec))
+            text_file.write('\nFit type: {:}'.format(p.typec))
+            text_file.write('\nChi-square: {:}'.format(out.chisqr))
+            text_file.write('\nReduced Chi-square: {:}\n'.format(out.redchi))
         '''
 
         ### Use this for summary in ASCII
         '''
         with open(summary, "a") as sum_file:
             if header == True:
-                sum_file.write('File\tiD1\tiD4\tiD5\tiG\twG\tD5G\t(D4+D5)/G\tD1/G\t%Gaussian\tfit\n')
+                sum_file.write('File\tiD1\tiD4\tiD5\tiG\twG\tD5G\t(D4+D5)/G\tD1/G\t%Gaussian\tfit\tChi-square\tred-chi-sq\n')
             sum_file.write('{:}\t'.format(file))
             sum_file.write('{:f}\t'.format(out.best_values['p2_amplitude']))
             sum_file.write('{:f}\t'.format(out.best_values['p0_amplitude']))
@@ -124,15 +129,20 @@ def calculate(file, type):
             else:
                 for i in range(0,3):
                     sum_file.write('{:}\t'.format(type-1))
-            sum_file.write('{:}\n'.format(p.typec))
+            sum_file.write('{:}\t'.format(p.typec))
+            sum_file.write('{:}\t'.format(out.chisqr))
+            sum_file.write('{:}\n'.format(out.redchi))
         '''
+
 
         ### Use this for summary in XLSX
         if header == True:
             WW=px.Workbook()
             pp=WW.active
             pp.title='Summary'
-            summaryHeader = ['File', 'iD1', 'iD4', 'iD5', 'iG', 'wG', 'D5G', '(D4+D5)/G', 'D1/G', 'D5 %Gaussian','D1 %Gaussian', 'G %Gaussian', 'Fit']
+            summaryHeader = ['File', 'iD1', 'iD4', 'iD5', 'iG', 'wG', 'D5G', '(D4+D5)/G', \
+                             'D1/G', 'D5 %Gaussian','D1 %Gaussian', 'G %Gaussian', 'Fit', \
+                             'Chi-square', 'Reduced Chi-square']
             pp.append(summaryHeader)
             WW.save(summary)
 
@@ -154,6 +164,7 @@ def calculate(file, type):
         else:
             summaryResults.extend(['{:}'.format(type-1), '{:}'.format(type-1), '{:}'.format(type-1)])
         summaryResults.extend([p.typec])
+        summaryResults.extend(['{:f}'.format(out.chisqr), '{:f}'.format(out.redchi)])
         pp.append(summaryResults)
         WW.save(summary)
 
