@@ -8,7 +8,7 @@ from lmfit.models import GaussianModel, LorentzianModel, PseudoVoigtModel
 import matplotlib.pyplot as plt
 import sys, os.path, getopt
 
-version = '20150213a'
+version = '20150213b'
 ### Define number of total peaks
 #global NumPeaks
 NumPeaks = 7
@@ -90,7 +90,9 @@ def calculate(file, type):
         if type ==0:
             print('G: {:f}% Gaussian'.format(out.best_values['p5_fraction']*100))
         print('Fit type: {:}\n'.format(p.typec))
-      
+
+        ### Uncomment to enable saving results of each fit in a separate file.
+        '''
         with open(outfile, "a") as text_file:
             text_file.write('\nD5/G = {:f}'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
             text_file.write('\n(D4+D5)/G = {:f}'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']))
@@ -98,9 +100,10 @@ def calculate(file, type):
             if type ==0:
                 text_file.write('\nG %Gaussian: {:f}'.format(out.best_values['p5_fraction']))
             text_file.write('\nFit type: {:}\n'.format(p.typec))
-
         '''
+
         ### Use this for summary in ASCII
+        '''
         with open(summary, "a") as sum_file:
             if header == True:
                 sum_file.write('File\tiD1\tiD4\tiD5\tiG\twG\tD5G\t(D4+D5)/G\tD1/G\t%Gaussian\tfit\n')
@@ -114,9 +117,12 @@ def calculate(file, type):
             sum_file.write('{:f}\t'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']))
             sum_file.write('{:f}\t'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude']))
             if type ==0:
+                sum_file.write('{:f}\t'.format(out.best_values['p1_fraction']))
+                sum_file.write('{:f}\t'.format(out.best_values['p2_fraction']))
                 sum_file.write('{:f}\t'.format(out.best_values['p5_fraction']))
             else:
-                sum_file.write('{:}\t'.format(type-1))
+                for i in range(0,3):
+                    sum_file.write('{:}\t'.format(type-1))
             sum_file.write('{:}\n'.format(p.typec))
         '''
 
