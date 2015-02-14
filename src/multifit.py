@@ -7,13 +7,16 @@ from numpy import *
 from lmfit.models import GaussianModel, LorentzianModel, PseudoVoigtModel
 import matplotlib.pyplot as plt
 import sys, os.path, getopt, glob
+from multiprocessing import Pool
 
 class defPar:
-    version = '20150213i'
+    version = '20150214a'
     ### Define number of total peaks
     NumPeaks = 7
     ### Save results as ASCII?
     ascii = False
+    ### Multiprocessing?
+    multiproc = False
 
 def calculate(file, type, showplot):
     p = Peak(type)
@@ -215,10 +218,20 @@ def main():
 
     for o, a in opts:
         if o in ("-b" , "--batch"):
-            for f in glob.glob('*.txt'):
-                if (f != 'summary.txt'):
-                    type = int(sys.argv[2])
-                    calculate(f, type, False)
+            
+            type = int(sys.argv[2])
+            if(defPar.multiproc == True):
+                p = Pool()
+                for f in glob.glob('*.txt'):
+                    if (f != 'summary.txt'):
+                        p.apply_async(calculate, args=(f, type, False))
+                p.close()
+                p.join()
+            else:
+                for f in glob.glob('*.txt'):
+                    if (f != 'summary.txt'):
+                        calculate(f, type, False)
+        
         elif o in ("-f", "--file"):
             file = str(sys.argv[2])
             type = int(sys.argv[3])
