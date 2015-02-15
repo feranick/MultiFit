@@ -10,13 +10,13 @@ import sys, os.path, getopt, glob
 from multiprocessing import Pool
 
 class defPar:
-    version = '20150214a'
+    version = '20150214b'
     ### Define number of total peaks
     NumPeaks = 7
     ### Save results as ASCII?
     ascii = False
     ### Multiprocessing?
-    multiproc = False
+    multiproc = True
 
 def calculate(file, type, showplot):
     p = Peak(type)
@@ -32,8 +32,6 @@ def calculate(file, type, showplot):
         for k in row:
             inval.append(k.internal_value)
     inv = resize(inval, [14, defPar.NumPeaks+1])
-
-    ### Use this to define qhich peak is active (NOTE: the first needs always to be 1)
     for i in range(1, defPar.NumPeaks+1):
         fpeak.extend([int(inv[1,i])])
 
