@@ -1,6 +1,10 @@
-# Multifit
-# Nicola Ferralis <feranick@hotmail.com>
-# The entire code is covered by GNU Public License (GPL) v.3
+#!/usr/bin/python
+
+###=============================================================
+### Multifit
+### Nicola Ferralis <feranick@hotmail.com>
+### The entire code is covered by GNU Public License (GPL) v.3
+###=============================================================
 
 ### Uncomment this if for headless servers.
 #import matplotlib
