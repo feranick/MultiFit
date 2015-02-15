@@ -2,6 +2,10 @@
 # Nicola Ferralis <feranick@hotmail.com>
 # The entire code is covered by GNU Public License (GPL) v.3
 
+### Uncomment this if for headless servers.
+#import matplotlib
+#matplotlib.use('Agg')
+### ---------------------------------------
 import openpyxl as px
 from numpy import *
 from lmfit.models import GaussianModel, LorentzianModel, PseudoVoigtModel
@@ -10,7 +14,7 @@ import sys, os.path, getopt, glob
 from multiprocessing import Pool
 
 class defPar:
-    version = '20150214b'
+    version = '20150215a'
     ### Define number of total peaks
     NumPeaks = 7
     ### Save results as ASCII?
@@ -65,7 +69,7 @@ def calculate(file, type, showplot):
 
     ### Initialize and plot initial prefitting curves
     init = mod.eval(pars, x=x)
-    fig = plt.figure()
+    fig = plt.figure(1)
     ax = fig.add_subplot(111)
     ax.plot(x, y, label='data')
     ax.plot(x, init, 'k--', label='initial')

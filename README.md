@@ -5,10 +5,10 @@ Usage
 ======
 (note the corerct use of flags): 
 
-For single file: 
+1. For single file: 
 python multifit.py -f filename n
 
-For batch fitting:
+2. For batch fitting:
 python multifit.py -b n
 
 where n:
@@ -20,8 +20,26 @@ where n:
 Fitting parameters are initialized within the
 "input_parameters.xlsx" Excel file.
 
+
+3. For Headless workstations:
+uncomment the two lines in multifit.py:
+    import matplotlib
+    matplotlib.use('Agg')
+
 Installation
 =============
+
+The following dependencies are required:
+
+    lmfit
+    scipy
+    matplotlib
+    openpyxl (> 2.1.4)
+
+These can be installed through the system repository (apt, macports, etc) or by 
+python's:
+
+    sudo easy_install lmfit 
 
 1. Ubuntu/Debian:
 -----------------
@@ -47,9 +65,5 @@ Install the following ports:
 3. MS Windows:
 ---------------
 
-Support is know planned any time soon. It is recommended to install the following libraries:
-    
-    lmfit
-    scipy
-    matplotlib
-    openpyxl
+Multifit should work on Windows with the proper dependencies installed.
+Support is not available.
