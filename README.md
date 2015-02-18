@@ -11,6 +11,9 @@ python multifit.py -f filename n
 2. For batch fitting:
 python multifit.py -b n
 
+3. For map fitting (map acquired with Horiba LabSpec5):
+python multifit.py -m filename n
+
 where n:
 
 0: PseudoVoigt
@@ -73,8 +76,7 @@ Support is not available.
 Experimental support for fitting Raman maps (mapfit)
 ====================================================
 
-Initial work is started on mapfit.py. This will eventually replace multifit.py, 
-to support anything from single spectral files to Raman maps, to batch files. 
 The current version has a class that opens the Raman map (Horiba LabSpec5, 
 saved in text file), and fits each spectra in the map. It does not produce (yet) 
-a visual map of the results.
+a visual map of the results, which are saved as (x, y, D5G). Future releases
+will allow for more flexibility as well as plotting.
