@@ -18,7 +18,7 @@ import sys, os.path, getopt, glob
 from multiprocessing import Pool
 
 class defPar:
-    version = '20150215a'
+    version = '20150218a'
     ### Define number of total peaks
     NumPeaks = 7
     ### Save results as ASCII?
@@ -75,7 +75,7 @@ def calculate(x, y, x1, y1, file, type, showplot):
 
     ### Perform fitting and display report
     print('\n************************************************************')
-    print(' Running fit on file: ' + file + ' (' + x1 + ', ' + y1 + ')')
+    print(' Running fit on file: ' + file + ' (' + str(x1) + ', ' + str(y1) + ')')
     out = mod.fit(y, pars,x=x)
     print(' Done! \n')
     print(out.fit_report(min_correl=0.25))
@@ -256,7 +256,7 @@ def main():
                 p.join()
             else:
                 for i in range (1, 10):
-                    rfm = readMap(file)
+                    rm = readMap(file)
                     calculate(rm.x, rm.y[i], rm.x1[i], rm.y1[i], file, type, False)
 
         else:
