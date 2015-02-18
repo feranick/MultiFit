@@ -19,7 +19,7 @@ from multiprocessing import Pool
 import multiprocessing as mp
 
 class defPar:
-    version = '20150218j'
+    version = '20150218k'
     ### Define number of total peaks
     NumPeaks = 7
     ### Save results as ASCII?
@@ -211,6 +211,33 @@ def calculate(x, y, x1, y1, file, type, map, showplot):
             plt.show()
 
 ###################
+class Map:
+    def __init__(self):
+        self.x = []
+        self.y = []
+        self.z = []
+
+    def draw(self, showplot):
+        fig = plt.figure(1)
+        ax = fig.add_subplot(111)
+        
+        phi_m = linspace(0, 2*pi, 100)
+        phi_p = linspace(0, 2*pi, 100)
+        X,Y = meshgrid(phi_p, phi_m)
+        Z = (2 + 0.7 - 2 * cos(Y)*cos(X) - 0.7 * cos(2*pi*0.5 - 2*Y).T)
+        p = ax.pcolor(X/(2*pi), Y/(2*pi), Z, cmap='Spectral', vmin=abs(Z).min(), vmax=abs(Z).max())
+        
+        fig.colorbar(p, ax=ax)
+        plt.xlabel('[um]')
+        plt.ylabel('[um]')
+        fig.savefig('map.png')  # Save plot
+        if(showplot == True):
+            print('*** Close plot to quit ***\n')
+            plt.show()
+
+
+
+###################
 
 def main():
     print('\n******************************')
@@ -218,7 +245,7 @@ def main():
     print('******************************\n')
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "bftmh:", ["batch", "file", "type", "map", "help"])
+        opts, args = getopt.getopt(sys.argv[1:], "bftmth:", ["batch", "file", "type", "map", "test", "help"])
     except getopt.GetoptError:
         # print help information and exit:
         usage()
@@ -263,6 +290,10 @@ def main():
                 for i in range (1, rm.num_lines):
                     calculate(rm.x, rm.y[i], rm.x1[i], rm.y1[i], file, type, True, False)
 
+
+        elif o in ("-t", "--test"):
+            map = Map()
+            map.draw(True)
         else:
             usage()
             sys.exit(2)
