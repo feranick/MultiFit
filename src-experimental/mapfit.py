@@ -19,7 +19,7 @@ from multiprocessing import Pool
 import multiprocessing as mp
 
 class defPar:
-    version = '20150218d'
+    version = '20150218e'
     ### Define number of total peaks
     NumPeaks = 7
     ### Save results as ASCII?
@@ -257,16 +257,15 @@ def main():
         elif o in ("-m", "--map"):
             file = str(sys.argv[2])
             type = int(sys.argv[3])
+            rm = readMap(file)
             if(defPar.multiproc == True):
                 p = Pool(mp.cpu_count())
-                rm = readMap(file)
-                for i in range (1, 10):
+                for i in range (1, rm.num_lines):
                     p.apply_async(c.calculate, args=(rm.x, rm.y[i], rm.x1[i], rm.y1[i], file, type, False))
                 p.close()
                 p.join()
             else:
-                for i in range (1, 10):
-                    rm = readMap(file)
+                for i in range (1, rm.num_lines):
                     c.calculate(rm.x, rm.y[i], rm.x1[i], rm.y1[i], file, type, False)
 
         else:
@@ -279,21 +278,19 @@ class readMap:
     ###############################
     
         ### Load data
-        num_lines = sum(1 for line in open(file))
+        self.num_lines = sum(1 for line in open(file))
         data = loadtxt(file)
         
-        self.x1 = [None]*num_lines
-        self.y1 = [None]*num_lines
-        self.y = [None]*num_lines
+        self.x1 = [None]*self.num_lines
+        self.y1 = [None]*self.num_lines
+        self.y = [None]*self.num_lines
     
         self.x = data[0, 2:]
-        for i in range(1, num_lines):
+        for i in range(1, self.num_lines):
             self.x1[i-1] = data[i, 1]
             self.y1[i-1] = data[i, 2]
             self.y[i-1] = data[i, 2:]
 
-        print self.x
-        print self.y[0]
         ###################################
 
 class readSingleSpectra:
