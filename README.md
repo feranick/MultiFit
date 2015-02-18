@@ -67,3 +67,14 @@ Install the following ports:
 
 Multifit should work on Windows with the proper dependencies installed.
 Support is not available.
+
+========================================================================
+
+Experimental support for fitting Raman maps (mapfit)
+====================================================
+
+Initial work is started on mapfit.py. This will eventually replace multifit.py, 
+to support anything from single spectral files to Raman maps, to batch files. 
+The current version has a class that opens the Raman map (Horiba LabSpec5, 
+saved in text file), and fits each spectra in the map. It does not produce (yet) 
+a visual map of the results.
