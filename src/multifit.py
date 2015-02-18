@@ -18,7 +18,7 @@ import sys, os.path, getopt, glob
 from multiprocessing import Pool
 
 class defPar:
-    version = '20150215a'
+    version = '20150217a'
     ### Define number of total peaks
     NumPeaks = 7
     ### Save results as ASCII?
@@ -26,7 +26,7 @@ class defPar:
     ### Multiprocessing?
     multiproc = True
 
-def calculate(file, type, showplot):
+def calculate(x, y, x1, y1, file, type, showplot):
     p = Peak(type)
     fpeak = []
     
@@ -66,11 +66,6 @@ def calculate(file, type, showplot):
         if fpeak[i]!=0:
             mod = mod + p.peak[i]
 
-    ### Load data
-    data = loadtxt(file)
-    x = data[:, 0]
-    y = data[:, 1]
-
     ### Initialize and plot initial prefitting curves
     init = mod.eval(pars, x=x)
     fig = plt.figure(1)
@@ -80,7 +75,7 @@ def calculate(file, type, showplot):
 
     ### Perform fitting and display report
     print('\n************************************************************')
-    print(' Running fit on file: ' + file)
+    print(' Running fit on file: ' + file + ' (' + x1 + ', ' + y1 + ')')
     out = mod.fit(y, pars,x=x)
     print(' Done! \n')
     print(out.fit_report(min_correl=0.25))
@@ -127,8 +122,10 @@ def calculate(file, type, showplot):
         if(defPar.ascii == True):
             with open(summary, "a") as sum_file:
                 if header == True:
-                    sum_file.write('File\tiD1\tiD4\tiD5\tiG\twG\tD5G\t(D4+D5)/G\tD1/G\t%Gaussian\tfit\tChi-square\tred-chi-sq\n')
+                    sum_file.write('File\tx1\ty1\tiD1\tiD4\tiD5\tiG\twG\tD5G\t(D4+D5)/G\tD1/G\t%Gaussian\tfit\tChi-square\tred-chi-sq\n')
                 sum_file.write('{:}\t'.format(file))
+                sum_file.write('{:}\t'.format(x1))
+                sum_file.write('{:}\t'.format(y1))
                 sum_file.write('{:f}\t'.format(out.best_values['p2_amplitude']))
                 sum_file.write('{:f}\t'.format(out.best_values['p0_amplitude']))
                 sum_file.write('{:f}\t'.format(out.best_values['p1_amplitude']))
@@ -154,7 +151,7 @@ def calculate(file, type, showplot):
                 WW=px.Workbook()
                 pp=WW.active
                 pp.title='Summary'
-                summaryHeader = ['File', 'iD1', 'iD4', 'iD5', 'iG', 'wG', 'D5G', '(D4+D5)/G', \
+                summaryHeader = ['File', 'x1', 'y1', 'iD1', 'iD4', 'iD5', 'iG', 'wG', 'D5G', '(D4+D5)/G', \
                                  'D1/G', 'D5 %Gaussian','D1 %Gaussian', 'G %Gaussian', 'Fit', \
                                  'Chi-square', 'Reduced Chi-square']
                 pp.append(summaryHeader)
@@ -163,7 +160,8 @@ def calculate(file, type, showplot):
             WW = px.load_workbook(summary)
             pp = WW.active
 
-            summaryResults = ['{:}'.format(file), '{:f}'.format(out.best_values['p2_amplitude']), \
+            summaryResults = ['{:}'.format(file), '{:}'.format(x1), '{:}'.format(y1), \
+                              '{:f}'.format(out.best_values['p2_amplitude']), \
                               '{:f}'.format(out.best_values['p0_amplitude']),
                               '{:f}'.format(out.best_values['p1_amplitude']), \
                               '{:f}'.format(out.best_values['p5_amplitude']), \
@@ -230,21 +228,33 @@ def main():
                 p = Pool()
                 for f in glob.glob('*.txt'):
                     if (f != 'summary.txt'):
-                        p.apply_async(calculate, args=(f, type, False))
+                        rs = readSingleSpectra(f)
+                        p.apply_async(calculate, args=(rs.x, rs.y, '0', '0', f, type, False))
                 p.close()
                 p.join()
             else:
                 for f in glob.glob('*.txt'):
                     if (f != 'summary.txt'):
-                        calculate(f, type, False)
+                        rs = readSingleSpectra(f)
+                        calculate(rs.x, rs.y, '0', '0', f, type, False)
         
         elif o in ("-f", "--file"):
             file = str(sys.argv[2])
             type = int(sys.argv[3])
-            calculate(file, type, True)
+            rs = readSingleSpectra(file)
+            calculate(rs.x, rs.y, '0', '0', file, type, True)
+                
         else:
             usage()
             sys.exit(2)
+
+
+
+class readSingleSpectra:
+    def __init__(self, file):
+        data = loadtxt(file)
+        self.x = data[:, 0]
+        self.y = data[:, 1]
 
 def usage():
     print('Usage: \n\n Single file:')
