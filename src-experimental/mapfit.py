@@ -16,15 +16,17 @@ from lmfit.models import GaussianModel, LorentzianModel, PseudoVoigtModel
 import matplotlib.pyplot as plt
 import sys, os.path, getopt, glob
 from multiprocessing import Pool
+import multiprocessing as mp
 
 class defPar:
-    version = '20150218a'
+    version = '20150218b'
     ### Define number of total peaks
     NumPeaks = 7
     ### Save results as ASCII?
     ascii = False
     ### Multiprocessing?
     multiproc = True
+
 
 def calculate(x, y, x1, y1, file, type, showplot):
     p = Peak(type)
@@ -220,12 +222,13 @@ def main():
         usage()
         sys.exit(2)
 
+    print('Using : ' + str(mp.cpu_count()) + ' CPUs')
     for o, a in opts:
         if o in ("-b" , "--batch"):
             
             type = int(sys.argv[2])
             if(defPar.multiproc == True):
-                p = Pool()
+                p = Pool(mp.cpu_count())
                 for f in glob.glob('*.txt'):
                     if (f != 'summary.txt'):
                         rs = readSingleSpectra(f)
@@ -248,7 +251,7 @@ def main():
             file = str(sys.argv[2])
             type = int(sys.argv[3])
             if(defPar.multiproc == True):
-                p = Pool()
+                p = Pool(mp.cpu_count())
                 rm = readMap(file)
                 for i in range (1, 10):
                     p.apply_async(calculate, args=(rm.x, rm.y[i], rm.x1[i], rm.y1[i], file, type, False))
@@ -267,18 +270,23 @@ class readMap:
 
     def __init__(self, file):
     ###############################
-        self.x1 = [None]*15
-        self.y1 = [None]*15
-        self.y = [None]*15
     
         ### Load data
+        num_lines = sum(1 for line in open(file))
         data = loadtxt(file)
+        
+        self.x1 = [None]*num_lines
+        self.y1 = [None]*num_lines
+        self.y = [None]*num_lines
     
         self.x = data[0, 2:]
-        for i in range(1, 10):
-            self.x1[i] = data[i, 1]
-            self.y1[i] = data[i, 2]
-            self.y[i] = data[i, 2:]
+        for i in range(1, num_lines):
+            self.x1[i-1] = data[i, 1]
+            self.y1[i-1] = data[i, 2]
+            self.y[i-1] = data[i, 2:]
+
+        print self.x
+        print self.y[0]
         ###################################
 
 class readSingleSpectra:
