@@ -18,17 +18,14 @@ import sys, os.path, getopt, glob
 from multiprocessing import Pool
 import multiprocessing as mp
 
-global z
-z = []
-
 class defPar:
-    version = '20150218m-exp'
+    version = '20150219a-exp'
     ### Define number of total peaks
     NumPeaks = 7
     ### Save results as ASCII?
     ascii = False
     ### Multiprocessing?
-    multiproc = False
+    multiproc = True
 
 
 def calculate(x, y, x1, y1, file, type, drawMap, showPlot):
@@ -79,9 +76,7 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot):
     print(' Running fit on file: ' + file + ' (' + str(x1) + ', ' + str(y1) + ')')
     out = mod.fit(y, pars,x=x)
     print(' Done! \n')
-    #print ('D5/G = {:f}'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
-    #defPar.tempholder = str(out.best_values['p1_amplitude']/out.best_values['p5_amplitude'])
-    #print (defPar.tempholder)
+    print(' Showing results for: ' + file + ' (' + str(x1) + ', ' + str(y1) + ')')
     print(out.fit_report(min_correl=0.25))
 
     ### Output file names.
@@ -217,9 +212,12 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot):
             plt.show()
 
     if(drawMap == True):
-        #print ('D5/G = {:f}'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
-        global z
-        z = out.best_values['p1_amplitude']/out.best_values['p5_amplitude']
+        with open(os.path.splitext(file)[0] + '_map.txt', "a") as map_file:
+            if(out.success == True):
+                map_file.write('{:}\t'.format(x1))
+                map_file.write('{:}\t'.format(y1))
+                map_file.write('{:}\n'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
+
 
 
 
@@ -229,8 +227,23 @@ class Map:
         self.x = []
         self.y = []
         self.z = []
+    
+    def readCoord(self, file):
+        self.num_lines = sum(1 for line in open(file))
+        data = loadtxt(file)
+        
+        self.x = [None]*self.num_lines
+        self.y = [None]*self.num_lines
+        self.z = [None]*self.num_lines
 
-    def draw(self, showplot):
+        for i in range(0, self.num_lines):
+            self.x[i] = data[i, 0]
+            self.y[i] = data[i, 1]
+            self.z[i] = data[i, 2]
+
+
+    def draw(self, file, showplot):
+        self.readCoord(file)
         fig = plt.figure(1)
         ax = fig.add_subplot(111)
         '''
@@ -240,7 +253,7 @@ class Map:
         Z = (2 + 0.7 - 2 * cos(Y)*cos(X) - 0.7 * cos(2*pi*0.5 - 2*Y).T)
         p = ax.pcolor(X/(2*pi), Y/(2*pi), Z, cmap='Spectral', vmin=abs(Z).min(), vmax=abs(Z).max())
         '''
-        p = ax.pcolor(self.x, self.y, self.z, cmap='Spectral', vmin=abs(self.z).min(), vmax=abs(self.z).max())
+        p = ax.pcolor(self.x, self.y, self.z, cmap='Spectral', vmin=min(self.z), vmax=max(self.z))
         fig.colorbar(p, ax=ax)
         plt.xlabel('[um]')
         plt.ylabel('[um]')
@@ -291,35 +304,25 @@ def main():
             calculate(rs.x, rs.y, '0', '0', file, type, False, True)
 
         elif o in ("-m", "--map"):
-            map = Map()
             file = str(sys.argv[2])
             type = int(sys.argv[3])
             rm = readMap(file)
+            map = Map()
             if(defPar.multiproc == True):
                 p = Pool(mp.cpu_count())
-                
                 for i in range (1, rm.num_lines):
                     p.apply_async(calculate, args=(rm.x, rm.y[i], rm.x1[i], rm.y1[i], file, type, True, False))
-                    map.x.extend([rm.x1[i]])
-                    map.y.extend([rm.y1[i]])
-                    map.z.extend([z])
-                
                 p.close()
                 p.join()
-                print(map.x)
-                print(map.z)
-                map.draw(True)
+
+                map.draw(os.path.splitext(file)[0] + '_map.txt', True)
 
             else:
                 for i in range (1, rm.num_lines):
                     calculate(rm.x, rm.y[i], rm.x1[i], rm.y1[i], file, type, True, False)
-                    map.x.extend([rm.x1[i]])
-                    map.y.extend([rm.y1[i]])
-                    map.z.extend([z])
-                    print(map.x)
-                    print map.z
 
-                map.draw(True)
+
+                map.draw(os.path.splitext(file)[0] + '_map.txt', True)
 
         elif o in ("-t", "--test"):
             Map.draw(True)
@@ -334,18 +337,19 @@ class readMap:
     ###############################
     
         ### Load data
-        self.num_lines = sum(1 for line in open(file))
+        self.num_lines = sum(1 for line in open(file))-1
         data = loadtxt(file)
         
-        self.x1 = [None]*self.num_lines
-        self.y1 = [None]*self.num_lines
-        self.y = [None]*self.num_lines
+        self.x1 = [None]*(self.num_lines)
+        self.y1 = [None]*(self.num_lines)
+        self.y = [None]*(self.num_lines)
     
         self.x = data[0, 2:]
-        for i in range(1, self.num_lines):
-            self.x1[i-1] = data[i, 0]
-            self.y1[i-1] = data[i, 1]
-            self.y[i-1] = data[i, 2:]
+        for i in range(0, self.num_lines):
+            self.x1[i] = data[i+1, 0]
+            self.y1[i] = data[i+1, 1]
+            self.y[i] = data[i+1, 2:]
+
 
         ###################################
 
