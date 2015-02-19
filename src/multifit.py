@@ -19,7 +19,7 @@ from multiprocessing import Pool
 import multiprocessing as mp
 
 class defPar:
-    version = '20150218j'
+    version = '20150218k'
     ### Define number of total peaks
     NumPeaks = 7
     ### Save results as ASCII?
@@ -282,8 +282,8 @@ class readMap:
     
         self.x = data[0, 2:]
         for i in range(1, self.num_lines):
-            self.x1[i-1] = data[i, 1]
-            self.y1[i-1] = data[i, 2]
+            self.x1[i-1] = data[i, 0]
+            self.y1[i-1] = data[i, 1]
             self.y[i-1] = data[i, 2:]
 
         ###################################
