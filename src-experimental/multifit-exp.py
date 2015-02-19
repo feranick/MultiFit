@@ -18,17 +18,20 @@ import sys, os.path, getopt, glob
 from multiprocessing import Pool
 import multiprocessing as mp
 
+global z
+z = []
+
 class defPar:
-    version = '20150218k'
+    version = '20150218m-exp'
     ### Define number of total peaks
     NumPeaks = 7
     ### Save results as ASCII?
     ascii = False
     ### Multiprocessing?
-    multiproc = True
+    multiproc = False
 
 
-def calculate(x, y, x1, y1, file, type, map, showplot):
+def calculate(x, y, x1, y1, file, type, drawMap, showPlot):
     p = Peak(type)
     fpeak = []
     
@@ -76,6 +79,9 @@ def calculate(x, y, x1, y1, file, type, map, showplot):
     print(' Running fit on file: ' + file + ' (' + str(x1) + ', ' + str(y1) + ')')
     out = mod.fit(y, pars,x=x)
     print(' Done! \n')
+    #print ('D5/G = {:f}'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
+    #defPar.tempholder = str(out.best_values['p1_amplitude']/out.best_values['p5_amplitude'])
+    #print (defPar.tempholder)
     print(out.fit_report(min_correl=0.25))
 
     ### Output file names.
@@ -94,7 +100,7 @@ def calculate(x, y, x1, y1, file, type, map, showplot):
         print('\nFit successful: ' + str(out.success))
 
 
-    if (map == False):
+    if (drawMap == False):
         if (fpeak[1] == 1 & fpeak[2] == 1 & fpeak[5] == 1):
             print('D5/G = {:f}'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
             print('(D4+D5)/G = {:f}'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']))
@@ -181,7 +187,7 @@ def calculate(x, y, x1, y1, file, type, map, showplot):
         WW.save(summary)
 
 
-    if (map == False):
+    if (drawMap == False):
         ### Plot optimal fit and individial components
         fig = plt.figure(1)
         ax = fig.add_subplot(111)
@@ -206,9 +212,16 @@ def calculate(x, y, x1, y1, file, type, map, showplot):
         plt.legend()
         plt.grid(True)
         plt.savefig(plotfile)  # Save plot
-        if(showplot == True):
+        if(showPlot == True):
             print('*** Close plot to quit ***\n')
             plt.show()
+
+    if(drawMap == True):
+        #print ('D5/G = {:f}'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
+        global z
+        z = out.best_values['p1_amplitude']/out.best_values['p5_amplitude']
+
+
 
 ###################
 class Map:
@@ -220,13 +233,14 @@ class Map:
     def draw(self, showplot):
         fig = plt.figure(1)
         ax = fig.add_subplot(111)
-        
+        '''
         phi_m = linspace(0, 2*pi, 100)
         phi_p = linspace(0, 2*pi, 100)
         X,Y = meshgrid(phi_p, phi_m)
         Z = (2 + 0.7 - 2 * cos(Y)*cos(X) - 0.7 * cos(2*pi*0.5 - 2*Y).T)
         p = ax.pcolor(X/(2*pi), Y/(2*pi), Z, cmap='Spectral', vmin=abs(Z).min(), vmax=abs(Z).max())
-        
+        '''
+        p = ax.pcolor(self.x, self.y, self.z, cmap='Spectral', vmin=abs(self.z).min(), vmax=abs(self.z).max())
         fig.colorbar(p, ax=ax)
         plt.xlabel('[um]')
         plt.ylabel('[um]')
@@ -277,23 +291,39 @@ def main():
             calculate(rs.x, rs.y, '0', '0', file, type, False, True)
 
         elif o in ("-m", "--map"):
+            map = Map()
             file = str(sys.argv[2])
             type = int(sys.argv[3])
             rm = readMap(file)
             if(defPar.multiproc == True):
                 p = Pool(mp.cpu_count())
+                
                 for i in range (1, rm.num_lines):
                     p.apply_async(calculate, args=(rm.x, rm.y[i], rm.x1[i], rm.y1[i], file, type, True, False))
+                    map.x.extend([rm.x1[i]])
+                    map.y.extend([rm.y1[i]])
+                    map.z.extend([z])
+                
                 p.close()
                 p.join()
+                print(map.x)
+                print(map.z)
+                map.draw(True)
+
             else:
                 for i in range (1, rm.num_lines):
                     calculate(rm.x, rm.y[i], rm.x1[i], rm.y1[i], file, type, True, False)
+                    map.x.extend([rm.x1[i]])
+                    map.y.extend([rm.y1[i]])
+                    map.z.extend([z])
+                    print(map.x)
+                    print map.z
 
+                map.draw(True)
 
         elif o in ("-t", "--test"):
-            map = Map()
-            map.draw(True)
+            Map.draw(True)
+
         else:
             usage()
             sys.exit(2)
@@ -313,8 +343,8 @@ class readMap:
     
         self.x = data[0, 2:]
         for i in range(1, self.num_lines):
-            self.x1[i-1] = data[i, 1]
-            self.y1[i-1] = data[i, 2]
+            self.x1[i-1] = data[i, 0]
+            self.y1[i-1] = data[i, 1]
             self.y[i-1] = data[i, 2:]
 
         ###################################
