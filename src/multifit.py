@@ -14,12 +14,16 @@ import openpyxl as px
 from numpy import *
 from lmfit.models import GaussianModel, LorentzianModel, PseudoVoigtModel
 import matplotlib.pyplot as plt
+from matplotlib.mlab import griddata
+from matplotlib.ticker import MaxNLocator
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
 import sys, os.path, getopt, glob
 from multiprocessing import Pool
 import multiprocessing as mp
 
 class defPar:
-    version = '20150218k'
+    version = '20150219b'
     ### Define number of total peaks
     NumPeaks = 7
     ### Save results as ASCII?
@@ -28,7 +32,7 @@ class defPar:
     multiproc = True
 
 
-def calculate(x, y, x1, y1, file, type, map, showplot):
+def calculate(x, y, x1, y1, file, type, drawMap, showPlot):
     p = Peak(type)
     fpeak = []
     
@@ -76,6 +80,7 @@ def calculate(x, y, x1, y1, file, type, map, showplot):
     print(' Running fit on file: ' + file + ' (' + str(x1) + ', ' + str(y1) + ')')
     out = mod.fit(y, pars,x=x)
     print(' Done! \n')
+    print(' Showing results for: ' + file + ' (' + str(x1) + ', ' + str(y1) + ')')
     print(out.fit_report(min_correl=0.25))
 
     ### Output file names.
@@ -94,7 +99,7 @@ def calculate(x, y, x1, y1, file, type, map, showplot):
         print('\nFit successful: ' + str(out.success))
 
 
-    if (map == False):
+    if (drawMap == False):
         if (fpeak[1] == 1 & fpeak[2] == 1 & fpeak[5] == 1):
             print('D5/G = {:f}'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
             print('(D4+D5)/G = {:f}'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']))
@@ -181,7 +186,7 @@ def calculate(x, y, x1, y1, file, type, map, showplot):
         WW.save(summary)
 
 
-    if (map == False):
+    if (drawMap == False):
         ### Plot optimal fit and individial components
         fig = plt.figure(1)
         ax = fig.add_subplot(111)
@@ -206,9 +211,58 @@ def calculate(x, y, x1, y1, file, type, map, showplot):
         plt.legend()
         plt.grid(True)
         plt.savefig(plotfile)  # Save plot
-        if(showplot == True):
+        if(showPlot == True):
             print('*** Close plot to quit ***\n')
             plt.show()
+
+    if(drawMap == True):
+        with open(os.path.splitext(file)[0] + '_map.txt', "a") as map_file:
+            if(out.success == True):
+                map_file.write('{:}\t'.format(x1))
+                map_file.write('{:}\t'.format(y1))
+                map_file.write('{:}\n'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
+
+
+
+
+###################
+class Map:
+    def __init__(self):
+        self.x = []
+        self.y = []
+        self.z = []
+    
+    def readCoord(self, file):
+        self.num_lines = sum(1 for line in open(file))
+        
+        data = genfromtxt(file)
+        self.x = data[:,0]
+        self.y = data[:,1]
+        self.z = data[:,2]
+
+    def draw(self, file, showplot):
+        self.readCoord(file)
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        
+        #p = ax.pcolor(self.x, self.y, self.z, cmap='Spectral', vmin=min(self.z), vmax=max(self.z))
+        #fig.colorbar(p, ax=ax)
+        surf = ax.plot_trisurf(self.x, self.y, self.z, cmap=cm.jet, linewidth=0)
+        fig.colorbar(surf)
+
+        ax.xaxis.set_major_locator(MaxNLocator(5))
+        ax.yaxis.set_major_locator(MaxNLocator(6))
+        ax.zaxis.set_major_locator(MaxNLocator(5))
+        fig.tight_layout()
+        
+        #plt.xlabel('[um]')
+        #plt.ylabel('[um]')
+        #fig.savefig('map.png')  # Save plot
+        #if(showplot == True):
+        #    print('*** Close plot to quit ***\n')
+        #    plt.show()
+
+
 
 ###################
 
@@ -218,7 +272,7 @@ def main():
     print('******************************\n')
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "bftmh:", ["batch", "file", "type", "map", "help"])
+        opts, args = getopt.getopt(sys.argv[1:], "bftmth:", ["batch", "file", "type", "map", "test", "help"])
     except getopt.GetoptError:
         # print help information and exit:
         usage()
@@ -253,15 +307,26 @@ def main():
             file = str(sys.argv[2])
             type = int(sys.argv[3])
             rm = readMap(file)
+            map = Map()
             if(defPar.multiproc == True):
                 p = Pool(mp.cpu_count())
                 for i in range (1, rm.num_lines):
                     p.apply_async(calculate, args=(rm.x, rm.y[i], rm.x1[i], rm.y1[i], file, type, True, False))
                 p.close()
                 p.join()
+
+                map.draw(os.path.splitext(file)[0] + '_map.txt', True)
+
             else:
                 for i in range (1, rm.num_lines):
                     calculate(rm.x, rm.y[i], rm.x1[i], rm.y1[i], file, type, True, False)
+                #map.draw(os.path.splitext(file)[0] + '_map.txt', True)
+
+        elif o in ("-t", "--test"):
+            file = str(sys.argv[2])
+            map = Map()
+            #map.readCoord(os.path.splitext(file)[0] + '_map.txt')
+            map.draw(os.path.splitext(file)[0] + '_map.txt', True)
 
         else:
             usage()
@@ -273,18 +338,19 @@ class readMap:
     ###############################
     
         ### Load data
-        self.num_lines = sum(1 for line in open(file))
+        self.num_lines = sum(1 for line in open(file))-1
         data = loadtxt(file)
         
-        self.x1 = [None]*self.num_lines
-        self.y1 = [None]*self.num_lines
-        self.y = [None]*self.num_lines
+        self.x1 = [None]*(self.num_lines)
+        self.y1 = [None]*(self.num_lines)
+        self.y = [None]*(self.num_lines)
     
         self.x = data[0, 2:]
-        for i in range(1, self.num_lines):
-            self.x1[i-1] = data[i, 0]
-            self.y1[i-1] = data[i, 1]
-            self.y[i-1] = data[i, 2:]
+        for i in range(0, self.num_lines):
+            self.x1[i] = data[i+1, 0]
+            self.y1[i] = data[i+1, 1]
+            self.y[i] = data[i+1, 2:]
+
 
         ###################################
 

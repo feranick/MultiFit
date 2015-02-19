@@ -14,12 +14,16 @@ import openpyxl as px
 from numpy import *
 from lmfit.models import GaussianModel, LorentzianModel, PseudoVoigtModel
 import matplotlib.pyplot as plt
+from matplotlib.mlab import griddata
+from matplotlib.ticker import MaxNLocator
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
 import sys, os.path, getopt, glob
 from multiprocessing import Pool
 import multiprocessing as mp
 
 class defPar:
-    version = '20150219a-exp'
+    version = '20150219b'
     ### Define number of total peaks
     NumPeaks = 7
     ### Save results as ASCII?
@@ -230,37 +234,33 @@ class Map:
     
     def readCoord(self, file):
         self.num_lines = sum(1 for line in open(file))
-        data = loadtxt(file)
         
-        self.x = [None]*self.num_lines
-        self.y = [None]*self.num_lines
-        self.z = [None]*self.num_lines
-
-        for i in range(0, self.num_lines):
-            self.x[i] = data[i, 0]
-            self.y[i] = data[i, 1]
-            self.z[i] = data[i, 2]
-
+        data = genfromtxt(file)
+        self.x = data[:,0]
+        self.y = data[:,1]
+        self.z = data[:,2]
 
     def draw(self, file, showplot):
         self.readCoord(file)
-        fig = plt.figure(1)
-        ax = fig.add_subplot(111)
-        '''
-        phi_m = linspace(0, 2*pi, 100)
-        phi_p = linspace(0, 2*pi, 100)
-        X,Y = meshgrid(phi_p, phi_m)
-        Z = (2 + 0.7 - 2 * cos(Y)*cos(X) - 0.7 * cos(2*pi*0.5 - 2*Y).T)
-        p = ax.pcolor(X/(2*pi), Y/(2*pi), Z, cmap='Spectral', vmin=abs(Z).min(), vmax=abs(Z).max())
-        '''
-        p = ax.pcolor(self.x, self.y, self.z, cmap='Spectral', vmin=min(self.z), vmax=max(self.z))
-        fig.colorbar(p, ax=ax)
-        plt.xlabel('[um]')
-        plt.ylabel('[um]')
-        fig.savefig('map.png')  # Save plot
-        if(showplot == True):
-            print('*** Close plot to quit ***\n')
-            plt.show()
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        
+        #p = ax.pcolor(self.x, self.y, self.z, cmap='Spectral', vmin=min(self.z), vmax=max(self.z))
+        #fig.colorbar(p, ax=ax)
+        surf = ax.plot_trisurf(self.x, self.y, self.z, cmap=cm.jet, linewidth=0)
+        fig.colorbar(surf)
+
+        ax.xaxis.set_major_locator(MaxNLocator(5))
+        ax.yaxis.set_major_locator(MaxNLocator(6))
+        ax.zaxis.set_major_locator(MaxNLocator(5))
+        fig.tight_layout()
+        
+        #plt.xlabel('[um]')
+        #plt.ylabel('[um]')
+        #fig.savefig('map.png')  # Save plot
+        #if(showplot == True):
+        #    print('*** Close plot to quit ***\n')
+        #    plt.show()
 
 
 
@@ -320,12 +320,13 @@ def main():
             else:
                 for i in range (1, rm.num_lines):
                     calculate(rm.x, rm.y[i], rm.x1[i], rm.y1[i], file, type, True, False)
-
-
-                map.draw(os.path.splitext(file)[0] + '_map.txt', True)
+                #map.draw(os.path.splitext(file)[0] + '_map.txt', True)
 
         elif o in ("-t", "--test"):
-            Map.draw(True)
+            file = str(sys.argv[2])
+            map = Map()
+            #map.readCoord(os.path.splitext(file)[0] + '_map.txt')
+            map.draw(os.path.splitext(file)[0] + '_map.txt', True)
 
         else:
             usage()
