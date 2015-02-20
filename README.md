@@ -14,6 +14,9 @@ python multifit.py -b n
 3. For map fitting (map acquired with Horiba LabSpec5):
 python multifit.py -m filename n
 
+4. Create new input paramter file (xlsx)
+python multifit.py -i
+
 where n:
 
 0: PseudoVoigt

@@ -14,16 +14,12 @@ import openpyxl as px
 from numpy import *
 from lmfit.models import GaussianModel, LorentzianModel, PseudoVoigtModel
 import matplotlib.pyplot as plt
-from matplotlib.mlab import griddata
-from matplotlib.ticker import MaxNLocator
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib import cm
 import sys, os.path, getopt, glob
 from multiprocessing import Pool
 import multiprocessing as mp
 
 class defPar:
-    version = '20150219b'
+    version = '20150219c'
     ### Define number of total peaks
     NumPeaks = 7
     ### Save results as ASCII?
@@ -242,18 +238,18 @@ class Map:
 
     def draw(self, file, showplot):
         self.readCoord(file)
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
+        #fig = plt.figure()
+        #ax = fig.add_subplot(111, projection='3d')
         
         #p = ax.pcolor(self.x, self.y, self.z, cmap='Spectral', vmin=min(self.z), vmax=max(self.z))
         #fig.colorbar(p, ax=ax)
-        surf = ax.plot_trisurf(self.x, self.y, self.z, cmap=cm.jet, linewidth=0)
-        fig.colorbar(surf)
+        #surf = ax.plot_trisurf(self.x, self.y, self.z, cmap=cm.jet, linewidth=0)
+        #fig.colorbar(surf)
 
-        ax.xaxis.set_major_locator(MaxNLocator(5))
-        ax.yaxis.set_major_locator(MaxNLocator(6))
-        ax.zaxis.set_major_locator(MaxNLocator(5))
-        fig.tight_layout()
+        #ax.xaxis.set_major_locator(MaxNLocator(5))
+        #ax.yaxis.set_major_locator(MaxNLocator(6))
+        #ax.zaxis.set_major_locator(MaxNLocator(5))
+        #fig.tight_layout()
         
         #plt.xlabel('[um]')
         #plt.ylabel('[um]')
@@ -272,7 +268,7 @@ def main():
     print('******************************\n')
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "bftmth:", ["batch", "file", "type", "map", "test", "help"])
+        opts, args = getopt.getopt(sys.argv[1:], "bftmith:", ["batch", "file", "type", "map", "input-par", "test", "help"])
     except getopt.GetoptError:
         # print help information and exit:
         usage()
@@ -328,15 +324,16 @@ def main():
             #map.readCoord(os.path.splitext(file)[0] + '_map.txt')
             map.draw(os.path.splitext(file)[0] + '_map.txt', True)
 
+        elif o in ("-i", "--input-par"):
+            genInitPar()
+
         else:
             usage()
             sys.exit(2)
 
 class readMap:
 
-    def __init__(self, file):
-    ###############################
-    
+    def __init__(self, file):    
         ### Load data
         self.num_lines = sum(1 for line in open(file))-1
         data = loadtxt(file)
@@ -351,23 +348,11 @@ class readMap:
             self.y1[i] = data[i+1, 1]
             self.y[i] = data[i+1, 2:]
 
-
-        ###################################
-
 class readSingleSpectra:
     def __init__(self, file):
         data = loadtxt(file)
         self.x = data[:, 0]
         self.y = data[:, 1]
-
-def usage():
-    print('Usage: \n\n Single file:')
-    print(' python multifit.py -f filename n\n')
-    print(' Batch:')
-    print(' python multifit.py -b n\n')
-    print(' Map (acquired with horiba LabSpec5: ')
-    print(' python multifit.py -m filename n\n')
-    print(' n = 0: PseudoVoigt 1: Gaussian 2: Lorentzian\n')
 
 class Peak:
     ### Define the typology of the peak
@@ -388,6 +373,44 @@ class Peak:
                 for i in range (0,defPar.NumPeaks):
                     self.peak[i] = LorentzianModel(prefix="p"+ str(i) +"_")
                 self.typec = "Lorentz"
+
+def genInitPar():
+
+    WW=px.Workbook()
+    pp=WW.active
+    pp.title='InputParamters'
+    
+    initPar = [['name', 'D4', 'D5', 'D1', 'D3a', 'D3b', 'G', 'D2'], \
+               ['activate peak',1,1,1,1,1,1,0], \
+               ['center',1160,1260,1330,1400,1520,1590,1680], \
+               ['center min','',1240,'','',1500,'',''], \
+               ['center max','',1275,'',1440,'','',''], \
+               ['sigma',45,45,80,40,40,40,40], \
+               ['sigma min',40,40,40,20,20,20,30], \
+               ['sigma max','','','',50,50,'',''], \
+               ['amplitude',500,1000,5000,500,500,2000,300], \
+               ['ampl. min',0,0,0,0,0,0,0], \
+               ['ampl. max','','','','','','',''], \
+               ['fraction',0.5,0.5,0.5,0.5,0.5,0.5,0.5], \
+               ['fraction min',0,0,0,0,0,0,0], \
+               ['fraction max',1,1,1,1,1,1,1]]
+    for row in range(0, 14):
+        pp.append(initPar[row])
+    
+    WW.save('input_parameters_test.xlsx')
+
+
+def usage():
+    print('Usage: \n\n Single file:')
+    print(' python multifit.py -f filename n\n')
+    print(' Batch:')
+    print(' python multifit.py -b n\n')
+    print(' Map (acquired with horiba LabSpec5: ')
+    print(' python multifit.py -m filename n\n')
+    print(' Create new input paramter file (xlsx): ')
+    print(' python multifit.py -i n\n')
+    print(' n = 0: PseudoVoigt 1: Gaussian 2: Lorentzian\n')
+
 
 if __name__ == "__main__":
     sys.exit(main())

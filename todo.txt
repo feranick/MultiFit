@@ -1,2 +1,2 @@
-Add ability to create input file if missing
+Improve mapping
 Ability to select the type of results in maps.
