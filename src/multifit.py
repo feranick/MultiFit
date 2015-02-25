@@ -19,7 +19,7 @@ from multiprocessing import Pool
 import multiprocessing as mp
 
 class defPar:
-    version = '20150225a'
+    version = '20150225b'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Save results as ASCII?
@@ -188,7 +188,7 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot):
         fig = plt.figure()
         ax = fig.add_subplot(111)
         ax.plot(x, y, label='data')
-        ax.plot(x, init, 'k--', label='initial')
+        #ax.plot(x, init, 'k--', label='initial')
         ax.plot(x, out.best_fit, 'r-', label='fit')
         y0 = p.peak[0].eval(x = x, **out.best_values)
         ax.plot(x,y0,'g')
@@ -211,7 +211,7 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot):
         if(showPlot == True):
             print('*** Close plot to quit ***\n')
             plt.show()
-        plt.clf()
+        plt.close()
 
     if(drawMap == True):
         with open(os.path.splitext(file)[0] + '_map.txt', "a") as map_file:
