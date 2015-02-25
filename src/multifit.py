@@ -19,7 +19,7 @@ from multiprocessing import Pool
 import multiprocessing as mp
 
 class defPar:
-    version = '20150224b'
+    version = '20150224c'
     ### Define number of total peaks
     NumPeaks = 7
     ### Save results as ASCII?
@@ -161,23 +161,23 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot):
         WW = px.load_workbook(summary)
         pp = WW.active
 
-        summaryResults = ['{:}'.format(file), '{:}'.format(x1), '{:}'.format(y1), \
-                        '{:f}'.format(out.best_values['p2_amplitude']), \
-                        '{:f}'.format(out.best_values['p0_amplitude']),
-                        '{:f}'.format(out.best_values['p1_amplitude']), \
-                        '{:f}'.format(out.best_values['p5_amplitude']), \
-                        '{:f}'.format(out.best_values['p5_sigma']*2), \
-                        '{:f}'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']), \
-                        '{:f}'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']), \
-                        '{:f}'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude'])]
+        summaryResults = ['{:}'.format(file), float('{:}'.format(x1)), float('{:}'.format(y1)), \
+                        float('{:f}'.format(out.best_values['p2_amplitude'])), \
+                        float('{:f}'.format(out.best_values['p0_amplitude'])),
+                        float('{:f}'.format(out.best_values['p1_amplitude'])), \
+                        float('{:f}'.format(out.best_values['p5_amplitude'])), \
+                        float('{:f}'.format(out.best_values['p5_sigma']*2)), \
+                        float('{:f}'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude'])), \
+                        float('{:f}'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude'])), \
+                        float('{:f}'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude']))]
         if type ==0:
-            summaryResults.extend(['{:f}'.format(out.best_values['p1_fraction']), \
-                                       '{:f}'.format(out.best_values['p2_fraction']), \
-                                       '{:f}'.format(out.best_values['p5_fraction'])])
+            summaryResults.extend([float('{:f}'.format(out.best_values['p1_fraction'])), \
+                                       float('{:f}'.format(out.best_values['p2_fraction'])), \
+                                       float('{:f}'.format(out.best_values['p5_fraction']))])
         else:
             summaryResults.extend(['{:}'.format(type-1), '{:}'.format(type-1), '{:}'.format(type-1)])
         summaryResults.extend([p.typec])
-        summaryResults.extend(['{:f}'.format(out.chisqr), '{:f}'.format(out.redchi)])
+        summaryResults.extend([float('{:f}'.format(out.chisqr)), float('{:f}'.format(out.redchi))])
         pp.append(summaryResults)
         WW.save(summary)
 
@@ -215,9 +215,9 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot):
     if(drawMap == True):
         with open(os.path.splitext(file)[0] + '_map.txt', "a") as map_file:
             if(out.success == True):
-                map_file.write('{:}\t'.format(x1))
-                map_file.write('{:}\t'.format(y1))
-                map_file.write('{:}\n'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
+                map_file.write(float('{:}\t'.format(x1)))
+                map_file.write(float('{:}\t'.format(y1)))
+                map_file.write(float('{:}\n'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude'])))
 
 	del p
 	del out
