@@ -19,7 +19,7 @@ from multiprocessing import Pool
 import multiprocessing as mp
 
 class defPar:
-    version = '20150224a'
+    version = '20150224b'
     ### Define number of total peaks
     NumPeaks = 7
     ### Save results as ASCII?
@@ -389,7 +389,7 @@ def genInitPar():
                ['center max','',1275,'',1440,'','',''], \
                ['sigma',45,45,80,40,40,40,40], \
                ['sigma min',40,40,40,20,20,20,30], \
-               ['sigma max','','','',50,50,'',''], \
+               ['sigma max','50','50','50',50,50,'50','50'], \
                ['amplitude',500,1000,5000,500,500,2000,300], \
                ['ampl. min',0,0,0,0,0,0,0], \
                ['ampl. max','','','','','','',''], \
