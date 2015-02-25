@@ -19,9 +19,9 @@ from multiprocessing import Pool
 import multiprocessing as mp
 
 class defPar:
-    version = '20150224c'
-    ### Define number of total peaks
-    NumPeaks = 7
+    version = '20150225a'
+    ### Define number of total peaks (do not change: this is read from file)
+    NumPeaks = 0
     ### Save results as ASCII?
     ascii = False
     ### Multiprocessing?
@@ -29,15 +29,15 @@ class defPar:
 
 
 def calculate(x, y, x1, y1, file, type, drawMap, showPlot):
-    p = Peak(type)
-    fpeak = []
     
     ### Load initialization parameters from xlsx file.
-    
     W = px.load_workbook('input_parameters.xlsx', use_iterators = True)
     sheet = W.active
     inval=[]
-
+    defPar.NumPeaks = sheet.get_highest_column() - 1
+    print (' Fitting with ' + str(defPar.NumPeaks) + ' peaks')
+	
+    fpeak = []
     for row in sheet.iter_rows():
         for k in row:
             inval.append(k.internal_value)
@@ -45,6 +45,7 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot):
     for i in range(1, defPar.NumPeaks+1):
         fpeak.extend([int(inv[1,i])])
 
+	p = Peak(type)
     ### Initialize parameters for fit.
     pars = p.peak[0].make_params()
     pars['p0_center'].set(inv[2,1], min = inv[3,1], max = inv[4,1] )
@@ -276,7 +277,7 @@ def main():
         usage()
         sys.exit(2)
 
-    print('Using : ' + str(mp.cpu_count()) + ' CPUs')
+    print(' Using : ' + str(mp.cpu_count()) + ' CPUs')
     for o, a in opts:
         if o in ("-b" , "--batch"):
             
