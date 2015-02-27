@@ -19,16 +19,18 @@ from multiprocessing import Pool
 import multiprocessing as mp
 
 class defPar:
-    version = '20150225b'
+    version = '20150226b'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
+    ### Plot initial fitting curve
+    initCurve = True
     ### Save results as ASCII?
     ascii = False
     ### Multiprocessing?
     multiproc = True
 
 
-def calculate(x, y, x1, y1, file, type, drawMap, showPlot):
+def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot):
     
     ### Load initialization parameters from xlsx file.
     W = px.load_workbook('input_parameters.xlsx', use_iterators = True)
@@ -50,7 +52,7 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot):
     pars = p.peak[0].make_params()
     pars['p0_center'].set(inv[2,1], min = inv[3,1], max = inv[4,1] )
     pars['p0_sigma'].set(inv[5,1], min = inv[6,1], max = inv [7,1])
-    pars['p0_amplitude'].set(inv[8,1], min=inv[9,1], max = inv[10,1])
+    pars['p0_amplitude'].set(inv[8,1]*ymax*80, min=inv[9,1], max = inv[10,1])
     if type ==0:
         pars['p0_fraction'].set(inv[11,1], min = inv[12,1], max = inv[13,1])
 
@@ -59,7 +61,7 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot):
             pars.update(p.peak[i].make_params())
             pars['p{:}_center'.format(str(i))].set(inv[2,i+1], min = inv[3,i+1], max = inv[4,i+1])
             pars['p{:}_sigma'.format(str(i))].set(inv[5,i+1], min = inv[6,i+1], max = inv [7,i+1])
-            pars['p{:}_amplitude'.format(str(i))].set(inv[8,i+1], min=inv[9,i+1], max = inv[10,i+1])
+            pars['p{:}_amplitude'.format(str(i))].set(inv[8,i+1]*ymax*80, min=inv[9,i+1], max = inv[10,i+1])
             if type ==0:
                 pars['p{:}_fraction'.format(str(i))].set(inv[11,i+1], min = inv[12,i+1], max = inv[13,i+1])
 
@@ -188,7 +190,8 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot):
         fig = plt.figure()
         ax = fig.add_subplot(111)
         ax.plot(x, y, label='data')
-        #ax.plot(x, init, 'k--', label='initial')
+        if(defPar.initCurve == True):
+            ax.plot(x, init, 'k--', label='initial')
         ax.plot(x, out.best_fit, 'r-', label='fit')
         y0 = p.peak[0].eval(x = x, **out.best_values)
         ax.plot(x,y0,'g')
@@ -287,20 +290,20 @@ def main():
                 for f in glob.glob('*.txt'):
                     if (f != 'summary.txt'):
                         rs = readSingleSpectra(f)
-                        p.apply_async(calculate, args=(rs.x, rs.y, '0', '0', f, type, False, False))
+                        p.apply_async(calculate, args=(rs.x, rs.y, '0', '0', rs.ymax, f, type, False, False))
                 p.close()
                 p.join()
             else:
                 for f in glob.glob('*.txt'):
                     if (f != 'summary.txt'):
                         rs = readSingleSpectra(f)
-                        calculate(rs.x, rs.y, '0', '0', f, type, False, False)
+                        calculate(rs.x, rs.y, '0', '0', rs.ymax, f, type, False, False)
         
         elif o in ("-f", "--file"):
             file = str(sys.argv[2])
             type = int(sys.argv[3])
             rs = readSingleSpectra(file)
-            calculate(rs.x, rs.y, '0', '0', file, type, False, True)
+            calculate(rs.x, rs.y, '0', '0', rs.ymax, file, type, False, True)
 
         elif o in ("-m", "--map"):
             file = str(sys.argv[2])
@@ -310,7 +313,7 @@ def main():
             if(defPar.multiproc == True):
                 p = Pool(mp.cpu_count())
                 for i in range (1, rm.num_lines):
-                    p.apply_async(calculate, args=(rm.x, rm.y[i], rm.x1[i], rm.y1[i], file, type, True, False))
+                    p.apply_async(calculate, args=(rm.x, rm.y[i], rm.x1[i], rm.y1[i], rm.ymax[i], file, type, True, False))
                 p.close()
                 p.join()
 
@@ -318,7 +321,7 @@ def main():
 
             else:
                 for i in range (1, rm.num_lines):
-                    calculate(rm.x, rm.y[i], rm.x1[i], rm.y1[i], file, type, True, False)
+                    calculate(rm.x, rm.y[i], rm.x1[i], rm.y1[i], rm.ymax[i], file, type, True, False)
                 #map.draw(os.path.splitext(file)[0] + '_map.txt', True)
 
         elif o in ("-t", "--test"):
@@ -344,18 +347,21 @@ class readMap:
         self.x1 = [None]*(self.num_lines)
         self.y1 = [None]*(self.num_lines)
         self.y = [None]*(self.num_lines)
+        self.ymax = [None]*(self.num_lines)
     
         self.x = data[0, 2:]
         for i in range(0, self.num_lines):
             self.x1[i] = data[i+1, 0]
             self.y1[i] = data[i+1, 1]
             self.y[i] = data[i+1, 2:]
+            self.ymax[i] = max(self.y[i])
 
 class readSingleSpectra:
     def __init__(self, file):
         data = loadtxt(file)
         self.x = data[:, 0]
         self.y = data[:, 1]
+        self.ymax = max(self.y)
 
 class Peak:
     ### Define the typology of the peak
@@ -385,13 +391,13 @@ def genInitPar():
     
     initPar = [['name', 'D4', 'D5', 'D1', 'D3a', 'D3b', 'G', 'D2'], \
                ['activate peak',1,1,1,1,1,1,0], \
-               ['center',1160,1260,1330,1400,1520,1590,1680], \
+               ['center',1160,1260,1330,1400,1500,1590,1680], \
                ['center min','',1240,'','',1500,'',''], \
                ['center max','',1275,'',1440,'','',''], \
                ['sigma',45,45,80,40,40,40,40], \
                ['sigma min',40,40,40,20,20,20,30], \
-               ['sigma max','50','50','50',50,50,'50','50'], \
-               ['amplitude',500,1000,5000,500,500,2000,300], \
+               ['sigma max',50,50,50,50,50,50,50], \
+               ['amplitude',0.1,0.2,1,0.1,0.1,0.8,0.1], \
                ['ampl. min',0,0,0,0,0,0,0], \
                ['ampl. max','','','','','','',''], \
                ['fraction',0.5,0.5,0.5,0.5,0.5,0.5,0.5], \
