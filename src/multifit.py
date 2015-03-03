@@ -12,14 +12,14 @@
 ### ---------------------------------------
 import openpyxl as px
 from numpy import *
-from lmfit.models import GaussianModel, LorentzianModel, PseudoVoigtModel
+from lmfit.models import GaussianModel, LorentzianModel, PseudoVoigtModel, VoigtModel
 import matplotlib.pyplot as plt
 import sys, os.path, getopt, glob
 from multiprocessing import Pool
 import multiprocessing as mp
 
 class defPar:
-    version = '20150226b'
+    version = '20150303a'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Plot initial fitting curve
@@ -37,8 +37,7 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot):
     sheet = W.active
     inval=[]
     defPar.NumPeaks = sheet.get_highest_column() - 1
-    print (' Fitting with ' + str(defPar.NumPeaks) + ' peaks')
-	
+    
     fpeak = []
     for row in sheet.iter_rows():
         for k in row:
@@ -48,13 +47,17 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot):
         fpeak.extend([int(inv[1,i])])
 
 	p = Peak(type)
+    print (' Fitting with ' + str(defPar.NumPeaks) + ' (' + p.typec + ') peaks')
     ### Initialize parameters for fit.
     pars = p.peak[0].make_params()
     pars['p0_center'].set(inv[2,1], min = inv[3,1], max = inv[4,1] )
     pars['p0_sigma'].set(inv[5,1], min = inv[6,1], max = inv [7,1])
     pars['p0_amplitude'].set(inv[8,1]*ymax*80, min=inv[9,1], max = inv[10,1])
-    if type ==0:
+    if (type ==0):
         pars['p0_fraction'].set(inv[11,1], min = inv[12,1], max = inv[13,1])
+    if (type ==3):
+        pars['p0_gamma'].set(20, min = 0, max = 50)
+
 
     for i in range (1, defPar.NumPeaks):
         if fpeak[i]!=0:
@@ -62,8 +65,11 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot):
             pars['p{:}_center'.format(str(i))].set(inv[2,i+1], min = inv[3,i+1], max = inv[4,i+1])
             pars['p{:}_sigma'.format(str(i))].set(inv[5,i+1], min = inv[6,i+1], max = inv [7,i+1])
             pars['p{:}_amplitude'.format(str(i))].set(inv[8,i+1]*ymax*80, min=inv[9,i+1], max = inv[10,i+1])
-            if type ==0:
+            if (type ==0):
                 pars['p{:}_fraction'.format(str(i))].set(inv[11,i+1], min = inv[12,i+1], max = inv[13,i+1])
+            if (type ==3):
+                pars['p{:}_gamma'.format(str(i))].set(20, min = 0, max = 50)
+
 
     ### Add relevant peak to fitting procedure.
     mod = p.peak[0]
@@ -204,8 +210,12 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot):
                 else:
                     ax.plot(x,y[i],'g')
 
-        ax.text(0.05, 0.9, 'D5/G = {:f}'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']), transform=ax.transAxes)
-        ax.text(0.05, 0.9, 'Fit type: {:}\n'.format(p.typec), transform=ax.transAxes)
+        ax.text(0.05, 0.875, 'Fit type: {:}\nD5/G = {:f}\nRed. Chi sq: {:}'.format( \
+                                p.typec, \
+                                out.best_values['p1_amplitude']/out.best_values['p5_amplitude'], \
+                                out.redchi), transform=ax.transAxes)
+#ax.text(0.05, 0.9, 'Fit type: {:}\n'.format(p.typec), transform=ax.transAxes)
+#ax.text(0.05, 0.85, 'Red. Chi sq: {:}'.format(out.redchi), transform=ax.transAxes)
         plt.xlabel('Raman shift [1/cm]')
         plt.ylabel('Intensity [arb. units]')
         plt.legend()
@@ -372,16 +382,24 @@ class Peak:
         if type==0:
             for i in range (0,defPar.NumPeaks):
                 self.peak[i] = PseudoVoigtModel(prefix="p"+ str(i) +"_")
-            self.typec = "PVoigt"
+            self.typec = "PseudoVoigt"
+        elif type == 1:
+            for i in range (0,defPar.NumPeaks):
+                self.peak[i] = GaussianModel(prefix="p"+ str(i) +"_")
+            self.typec = "Gauss"
+        elif type == 2:
+            for i in range (0,defPar.NumPeaks):
+                self.peak[i] = LorentzianModel(prefix="p"+ str(i) +"_")
+            self.typec = "Lorentz"
+        elif type ==3:
+            for i in range (0,defPar.NumPeaks):
+                self.peak[i] = VoigtModel(prefix="p"+ str(i) +"_")
+            self.typec = "Voigt"
         else:
-            if type == 1:
-                for i in range (0,defPar.NumPeaks):
-                    self.peak[i] = GaussianModel(prefix="p"+ str(i) +"_")
-                self.typec = "Gauss"
-            else:
-                for i in range (0,defPar.NumPeaks):
-                    self.peak[i] = LorentzianModel(prefix="p"+ str(i) +"_")
-                self.typec = "Lorentz"
+            print("Warning: type undefined. Using PseudoVoigt")
+            for i in range (0,defPar.NumPeaks):
+                self.peak[i] = PseudoVoigtModel(prefix="p"+ str(i) +"_")
+            self.typec = "PVoigt"
 
 def genInitPar():
 

@@ -22,6 +22,7 @@ where n:
 0: PseudoVoigt
 1: Gaussian
 2: Lorentzian
+3. Voigt
 
 Fitting parameters are initialized within the
 "input_parameters.xlsx" Excel file.
