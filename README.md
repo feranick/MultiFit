@@ -6,16 +6,16 @@ Usage
 (note the corerct use of flags): 
 
 1. For single file: 
-python multifit.py -f filename n
+./multifit.py -f filename n
 
 2. For batch fitting:
-python multifit.py -b n
+./multifit.py -b n
 
 3. For map fitting (map acquired with Horiba LabSpec5):
-python multifit.py -m filename n
+./multifit.py -m filename n
 
 4. Create new input paramter file (xlsx)
-python multifit.py -i
+./multifit.py -i
 
 where n:
 

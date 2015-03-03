@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#! /usr/bin/env python
 
 ###=============================================================
 ### Multifit
@@ -19,7 +19,7 @@ from multiprocessing import Pool
 import multiprocessing as mp
 
 class defPar:
-    version = '20150303a'
+    version = '20150303b'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Plot initial fitting curve
