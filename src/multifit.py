@@ -436,7 +436,7 @@ def usage():
     print(' python multifit.py -m filename n\n')
     print(' Create new input paramter file (xlsx): ')
     print(' python multifit.py -i n\n')
-    print(' n = 0: PseudoVoigt 1: Gaussian 2: Lorentzian\n')
+    print(' n = 0: PseudoVoigt 1: Gaussian 2: Lorentzian 3: Voigt\n')
 
 
 if __name__ == "__main__":
