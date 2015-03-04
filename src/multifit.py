@@ -19,7 +19,7 @@ from multiprocessing import Pool
 import multiprocessing as mp
 
 class defPar:
-    version = '20150303b'
+    version = '20150304a'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Plot initial fitting curve
@@ -214,10 +214,10 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot):
                                 p.typec, \
                                 out.best_values['p1_amplitude']/out.best_values['p5_amplitude'], \
                                 out.redchi), transform=ax.transAxes)
-#ax.text(0.05, 0.9, 'Fit type: {:}\n'.format(p.typec), transform=ax.transAxes)
-#ax.text(0.05, 0.85, 'Red. Chi sq: {:}'.format(out.redchi), transform=ax.transAxes)
+
         plt.xlabel('Raman shift [1/cm]')
         plt.ylabel('Intensity [arb. units]')
+        plt.title(file)
         plt.legend()
         plt.grid(True)
         plt.savefig(plotfile)  # Save plot
@@ -235,6 +235,21 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot):
 
 	del p
 	del out
+
+###################
+def plotData(x, y, file):
+    ### Plot initial data
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(x, y, label='data')
+    plt.xlabel('Raman shift [1/cm]')
+    plt.ylabel('Intensity [arb. units]')
+    plt.title(file)
+    plt.legend()
+    plt.grid(True)
+    print('*** Close plot to quit ***\n')
+    plt.show()
+    plt.close()
 
 
 ###################
@@ -284,7 +299,7 @@ def main():
     print('******************************\n')
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "bftmith:", ["batch", "file", "type", "map", "input-par", "test", "help"])
+        opts, args = getopt.getopt(sys.argv[1:], "bftmitph:", ["batch", "file", "type", "map", "input-par", "test", "plot", "help"])
     except getopt.GetoptError:
         # print help information and exit:
         usage()
@@ -314,6 +329,12 @@ def main():
             type = int(sys.argv[3])
             rs = readSingleSpectra(file)
             calculate(rs.x, rs.y, '0', '0', rs.ymax, file, type, False, True)
+
+        elif o in ("-p", "--plot"):
+            file = str(sys.argv[2])
+            rs = readSingleSpectra(file)
+            
+            plotData(rs.x, rs.y, file)
 
         elif o in ("-m", "--map"):
             file = str(sys.argv[2])
@@ -430,10 +451,12 @@ def genInitPar():
 def usage():
     print('Usage: \n\n Single file:')
     print(' python multifit.py -f filename n\n')
-    print(' Batch:')
+    print(' Batch processing:')
     print(' python multifit.py -b n\n')
-    print(' Map (acquired with horiba LabSpec5: ')
+    print(' Map (acquired with horiba LabSpec5): ')
     print(' python multifit.py -m filename n\n')
+    print(' Plot data only (no fit): ')
+    print(' python multifit.py -p filename \n')
     print(' Create new input paramter file (xlsx): ')
     print(' python multifit.py -i n\n')
     print(' n = 0: PseudoVoigt 1: Gaussian 2: Lorentzian 3: Voigt\n')

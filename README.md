@@ -3,7 +3,7 @@ Software for multipeak fitting Raman Spectra of Carbon Materials
 
 Usage 
 ======
-(note the corerct use of flags): 
+(note the correct use of flags): 
 
 1. For single file: 
 ./multifit.py -f filename n
@@ -14,7 +14,10 @@ Usage
 3. For map fitting (map acquired with Horiba LabSpec5):
 ./multifit.py -m filename n
 
-4. Create new input paramter file (xlsx)
+4. Plot data only (no fitting):
+./multifit.py -p filename
+
+5. Create new input paramter file (xlsx)
 ./multifit.py -i
 
 where n:
