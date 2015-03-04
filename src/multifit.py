@@ -15,13 +15,16 @@ from numpy import *
 from lmfit.models import GaussianModel, LorentzianModel, PseudoVoigtModel, VoigtModel
 import matplotlib.pyplot as plt
 import sys, os.path, getopt, glob
+from os.path import exists
 from multiprocessing import Pool
 import multiprocessing as mp
 
 class defPar:
-    version = '20150304c'
+    version = '20150304f'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
+    ### Name input paramter file
+    inputParFile = 'input_parameters.xlsx'
     ### Plot initial fitting curve
     initCurve = True
     ### Save results as ASCII?
@@ -33,7 +36,7 @@ class defPar:
 def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot):
     
     ### Load initialization parameters from xlsx file.
-    W = px.load_workbook('input_parameters.xlsx', use_iterators = True)
+    W = px.load_workbook(defPar.inputParFile, use_iterators = True)
     sheet = W.active
     inval=[]
     defPar.NumPeaks = sheet.get_highest_column() - 1
@@ -299,7 +302,7 @@ class Map:
 def main():
     print('\n******************************')
     print(' MultiFit v.' + defPar.version)
-    print('******************************\n')
+    print('******************************')
 
     try:
         opts, args = getopt.getopt(sys.argv[1:], "bftmitph:", ["batch", "file", "type", "map", "input-par", "test", "plot", "help"])
@@ -308,7 +311,14 @@ def main():
         usage()
         sys.exit(2)
 
-    print(' Using : ' + str(mp.cpu_count()) + ' CPUs')
+    if not exists(defPar.inputParFile):
+        print '\n Init parameter not found. Generating a new one...'
+        genInitPar()
+
+    if(defPar.multiproc == True):
+        print('\n Multiprocessing enabled: ' + str(mp.cpu_count()) + ' CPUs\n')
+    else:
+        print('\n Multiprocessing disabled\n')
     for o, a in opts:
         if o in ("-b" , "--batch"):
             
@@ -332,7 +342,7 @@ def main():
             type = int(sys.argv[3])
             rs = readSingleSpectra(file)
             calculate(rs.x, rs.y, '0', '0', rs.ymax, file, type, False, True)
-        
+
 
         elif o in ("-p", "--plot"):
             if(len(sys.argv) < 3):
@@ -354,7 +364,6 @@ def main():
             else:
                 file = str(sys.argv[2])
                 rs = readSingleSpectra(file)
-                
                 plotData(rs.x, rs.y, file, True)
 
 
@@ -392,29 +401,37 @@ def main():
 
 class readMap:
 
-    def __init__(self, file):    
-        ### Load data
-        self.num_lines = sum(1 for line in open(file))-1
-        data = loadtxt(file)
+    def __init__(self, file):
+        if exists(file):
+            ### Load data
+            self.num_lines = sum(1 for line in open(file))-1
+            data = loadtxt(file)
         
-        self.x1 = [None]*(self.num_lines)
-        self.y1 = [None]*(self.num_lines)
-        self.y = [None]*(self.num_lines)
-        self.ymax = [None]*(self.num_lines)
+            self.x1 = [None]*(self.num_lines)
+            self.y1 = [None]*(self.num_lines)
+            self.y = [None]*(self.num_lines)
+            self.ymax = [None]*(self.num_lines)
     
-        self.x = data[0, 2:]
-        for i in range(0, self.num_lines):
-            self.x1[i] = data[i+1, 0]
-            self.y1[i] = data[i+1, 1]
-            self.y[i] = data[i+1, 2:]
-            self.ymax[i] = max(self.y[i])
+            self.x = data[0, 2:]
+            for i in range(0, self.num_lines):
+                self.x1[i] = data[i+1, 0]
+                self.y1[i] = data[i+1, 1]
+                self.y[i] = data[i+1, 2:]
+                self.ymax[i] = max(self.y[i])
+        else:
+            print(' File: ' + file + ' not found\n')
+            sys.exit(2)
 
 class readSingleSpectra:
     def __init__(self, file):
-        data = loadtxt(file)
-        self.x = data[:, 0]
-        self.y = data[:, 1]
-        self.ymax = max(self.y)
+        if exists(file):
+            data = loadtxt(file)
+            self.x = data[:, 0]
+            self.y = data[:, 1]
+            self.ymax = max(self.y)
+        else:
+            print(' File: ' + file + ' not found\n')
+            sys.exit(2)
 
 class Peak:
     ### Define the typology of the peak
@@ -445,12 +462,15 @@ class Peak:
             self.typec = "PVoigt"
 
 def genInitPar():
-
-    WW=px.Workbook()
-    pp=WW.active
-    pp.title='InputParamters'
+    if exists(defPar.inputParFile):
+        print(' Input parameter file: ' + defPar.inputParFile + ' already exists\n')
+        sys.exit(2)
+    else:
+        WW=px.Workbook()
+        pp=WW.active
+        pp.title='InputParameters'
     
-    initPar = [['name', 'D4', 'D5', 'D1', 'D3a', 'D3b', 'G', 'D2'], \
+        initPar = [['name', 'D4', 'D5', 'D1', 'D3a', 'D3b', 'G', 'D2'], \
                ['activate peak',1,1,1,1,1,1,0], \
                ['center',1160,1260,1330,1400,1500,1590,1680], \
                ['center min','',1240,'','',1500,'',''], \
@@ -464,10 +484,11 @@ def genInitPar():
                ['fraction',0.5,0.5,0.5,0.5,0.5,0.5,0.5], \
                ['fraction min',0,0,0,0,0,0,0], \
                ['fraction max',1,1,1,1,1,1,1]]
-    for row in range(0, 14):
-        pp.append(initPar[row])
+        for row in range(0, 14):
+            pp.append(initPar[row])
     
-    WW.save('input_parameters_test.xlsx')
+        WW.save(defPar.inputParFile)
+        print(' Input paramters saved in: ' + defPar.inputParFile)
 
 
 def usage():
