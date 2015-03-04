@@ -19,7 +19,7 @@ from multiprocessing import Pool
 import multiprocessing as mp
 
 class defPar:
-    version = '20150304a'
+    version = '20150304b'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Plot initial fitting curve
@@ -239,14 +239,16 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot):
 ###################
 def plotData(x, y, file):
     ### Plot initial data
+    pngData = os.path.splitext(file)[0] + '.png'   # Save plot as image
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.plot(x, y, label='data')
     plt.xlabel('Raman shift [1/cm]')
     plt.ylabel('Intensity [arb. units]')
     plt.title(file)
-    plt.legend()
+    #plt.legend()
     plt.grid(True)
+    plt.savefig(pngData)  # Save plot
     print('*** Close plot to quit ***\n')
     plt.show()
     plt.close()
