@@ -19,7 +19,7 @@ from multiprocessing import Pool
 import multiprocessing as mp
 
 class defPar:
-    version = '20150304b'
+    version = '20150304c'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Plot initial fitting curve
@@ -237,7 +237,7 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot):
 	del out
 
 ###################
-def plotData(x, y, file):
+def plotData(x, y, file, showPlot):
     ### Plot initial data
     pngData = os.path.splitext(file)[0] + '.png'   # Save plot as image
     fig = plt.figure()
@@ -249,8 +249,9 @@ def plotData(x, y, file):
     #plt.legend()
     plt.grid(True)
     plt.savefig(pngData)  # Save plot
-    print('*** Close plot to quit ***\n')
-    plt.show()
+    if(showPlot == True):
+        print('*** Close plot to quit ***\n')
+        plt.show()
     plt.close()
 
 
@@ -331,12 +332,31 @@ def main():
             type = int(sys.argv[3])
             rs = readSingleSpectra(file)
             calculate(rs.x, rs.y, '0', '0', rs.ymax, file, type, False, True)
+        
 
         elif o in ("-p", "--plot"):
-            file = str(sys.argv[2])
-            rs = readSingleSpectra(file)
-            
-            plotData(rs.x, rs.y, file)
+            if(len(sys.argv) < 3):
+                if(defPar.multiproc == True):
+                    p = Pool(mp.cpu_count())
+                    for f in glob.glob('*.txt'):
+                        if (f != 'summary.txt'):
+                            rs = readSingleSpectra(f)
+                            print ("Saving plot for: " + f)
+                            p.apply_async(plotData, args=(rs.x, rs.y, f, False))
+                    p.close()
+                    p.join()
+                else:
+                    for f in glob.glob('*.txt'):
+                        if (f != 'summary.txt'):
+                            rs = readSingleSpectra(f)
+                            print ("Saving plot for: " + f)
+                            plotData(rs.x, rs.y, f, False)
+            else:
+                file = str(sys.argv[2])
+                rs = readSingleSpectra(file)
+                
+                plotData(rs.x, rs.y, file, True)
+
 
         elif o in ("-m", "--map"):
             file = str(sys.argv[2])
@@ -457,8 +477,10 @@ def usage():
     print(' python multifit.py -b n\n')
     print(' Map (acquired with horiba LabSpec5): ')
     print(' python multifit.py -m filename n\n')
-    print(' Plot data only (no fit): ')
+    print(' Create and save plot of data only (no fit): ')
     print(' python multifit.py -p filename \n')
+    print(' Create and save plot of batch data (no fit): ')
+    print(' python multifit.py -p \n')
     print(' Create new input paramter file (xlsx): ')
     print(' python multifit.py -i n\n')
     print(' n = 0: PseudoVoigt 1: Gaussian 2: Lorentzian 3: Voigt\n')

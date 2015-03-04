@@ -14,10 +14,13 @@ Usage
 3. For map fitting (map acquired with Horiba LabSpec5):
 ./multifit.py -m filename n
 
-4. Plot data only (no fitting):
+4. Create and save plot data only (no fitting):
 ./multifit.py -p filename
 
-5. Create new input paramter file (xlsx)
+5. Create and save plot batch data (no fitting):
+./multifit.py -p
+
+6. Create new input paramter file (xlsx)
 ./multifit.py -i
 
 where n:
