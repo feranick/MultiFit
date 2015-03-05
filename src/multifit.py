@@ -20,7 +20,7 @@ from multiprocessing import Pool
 import multiprocessing as mp
 
 class defPar:
-    version = '20150304f'
+    version = '20150305a'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -59,7 +59,7 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot):
     if (type ==0):
         pars['p0_fraction'].set(inv[11,1], min = inv[12,1], max = inv[13,1])
     if (type ==3):
-        pars['p0_gamma'].set(20, min = 0, max = 50)
+        pars['p0_gamma'].set(inv[5,1])
 
 
     for i in range (1, defPar.NumPeaks):
@@ -71,7 +71,7 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot):
             if (type ==0):
                 pars['p{:}_fraction'.format(str(i))].set(inv[11,i+1], min = inv[12,i+1], max = inv[13,i+1])
             if (type ==3):
-                pars['p{:}_gamma'.format(str(i))].set(20, min = 0, max = 50)
+                pars['p{:}_gamma'.format(str(i))].set(inv[5,i+1])
 
 
     ### Add relevant peak to fitting procedure.
