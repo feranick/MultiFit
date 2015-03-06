@@ -24,11 +24,11 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '20150305d'
+    version = '20150305e'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Save results as ASCII?
-    ascii = False
+    ascii = True
     ### Name input paramter file
     inputParFile = 'input_parameters.xlsx'
     if(ascii == True):
@@ -44,7 +44,7 @@ class defPar:
 ''' Main routine to perform and plot the fit '''
 ####################################################################
 
-def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot):
+def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot, lab):
     
     ### Load initialization parameters from xlsx file.
     W = px.load_workbook(defPar.inputParFile, use_iterators = True)
@@ -162,7 +162,8 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot):
                     sum_file.write('{:}\t'.format(type-1))
                 sum_file.write('{:}\t'.format(p.typec))
             sum_file.write('{:}\t'.format(out.chisqr))
-            sum_file.write('{:}\n'.format(out.redchi))
+            sum_file.write('{:}\t'.format(out.redchi))
+            sum_file.write('{:}\n'.format(lab))
 
     ### Use this for summary in XLSX
     else:
@@ -172,7 +173,7 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot):
             pp.title='Summary'
             summaryHeader = ['File', 'x1', 'y1', 'iD1', 'iD4', 'iD5', 'iG', 'wG', 'D5G', '(D4+D5)/G', \
                                  'D1/G', 'D5 %Gaussian','D1 %Gaussian', 'G %Gaussian', 'Fit', \
-                                 'Chi-square', 'Reduced Chi-square']
+                                 'Chi-square', 'Reduced Chi-square', 'Label']
             pp.append(summaryHeader)
             WW.save(defPar.summary)
 
@@ -195,7 +196,7 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot):
         else:
             summaryResults.extend(['{:}'.format(type-1), '{:}'.format(type-1), '{:}'.format(type-1)])
         summaryResults.extend([p.typec])
-        summaryResults.extend([float('{:f}'.format(out.chisqr)), float('{:f}'.format(out.redchi))])
+        summaryResults.extend([float('{:f}'.format(out.chisqr)), float('{:f}'.format(out.redchi)), lab])
         pp.append(summaryResults)
         WW.save(defPar.summary)
 
@@ -337,26 +338,29 @@ def main():
         if o in ("-b" , "--batch"):
             
             type = int(sys.argv[2])
+            i = 0
             if(defPar.multiproc == True):
                 p = Pool(mp.cpu_count())
                 for f in glob.glob('*.txt'):
                     if (f != 'summary.txt'):
                         rs = readSingleSpectra(f)
-                        p.apply_async(calculate, args=(rs.x, rs.y, '0', '0', rs.ymax, f, type, False, False))
+                        p.apply_async(calculate, args=(rs.x, rs.y, '0', '0', rs.ymax, f, type, False, False, i))
+                        i += 1
                 p.close()
                 p.join()
             else:
                 for f in glob.glob('*.txt'):
                     if (f != 'summary.txt'):
                         rs = readSingleSpectra(f)
-                        calculate(rs.x, rs.y, '0', '0', rs.ymax, f, type, False, False)
+                        calculate(rs.x, rs.y, '0', '0', rs.ymax, f, type, False, False, i)
+                        i += 1
             addBlankLine(defPar.summary)
         
         elif o in ("-f", "--file"):
             file = str(sys.argv[2])
             type = int(sys.argv[3])
             rs = readSingleSpectra(file)
-            calculate(rs.x, rs.y, '0', '0', rs.ymax, file, type, False, True)
+            calculate(rs.x, rs.y, '0', '0', rs.ymax, file, type, False, True, '')
 
 
         elif o in ("-p", "--plot"):
@@ -390,7 +394,7 @@ def main():
             if(defPar.multiproc == True):
                 p = Pool(mp.cpu_count())
                 for i in range (1, rm.num_lines):
-                    p.apply_async(calculate, args=(rm.x, rm.y[i], rm.x1[i], rm.y1[i], rm.ymax[i], file, type, True, False))
+                    p.apply_async(calculate, args=(rm.x, rm.y[i], rm.x1[i], rm.y1[i], rm.ymax[i], file, type, True, False, ''))
                 p.close()
                 p.join()
 
@@ -398,7 +402,7 @@ def main():
 
             else:
                 for i in range (1, rm.num_lines):
-                    calculate(rm.x, rm.y[i], rm.x1[i], rm.y1[i], rm.ymax[i], file, type, True, False)
+                    calculate(rm.x, rm.y[i], rm.x1[i], rm.y1[i], rm.ymax[i], file, type, True, False, '')
                 #map.draw(os.path.splitext(file)[0] + '_map.txt', True)
 
         elif o in ("-t", "--test"):
