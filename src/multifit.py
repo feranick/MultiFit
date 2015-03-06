@@ -19,8 +19,12 @@ from os.path import exists
 from multiprocessing import Pool
 import multiprocessing as mp
 
+
+####################################################################
+''' Program definitions and configuration variables '''
+####################################################################
 class defPar:
-    version = '20150305c'
+    version = '20150305d'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Save results as ASCII?
@@ -36,6 +40,9 @@ class defPar:
     ### Multiprocessing?
     multiproc = True
 
+####################################################################
+''' Main routine to perform and plot the fit '''
+####################################################################
 
 def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot):
     
@@ -238,7 +245,11 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot):
 	del p
 	del out
 
-###################
+
+####################################################################
+''' Drawing only routine '''
+####################################################################
+
 def plotData(x, y, file, showPlot):
     ### Plot initial data
     pngData = os.path.splitext(file)[0] + '.png'   # Save plot as image
@@ -257,7 +268,10 @@ def plotData(x, y, file, showPlot):
     plt.close()
 
 
-###################
+####################################################################
+''' Definition of class map'''
+####################################################################
+
 class Map:
     def __init__(self):
         self.x = []
@@ -294,7 +308,10 @@ class Map:
         #    print('*** Close plot to quit ***\n')
         #    plt.show()
 
-###################
+
+####################################################################
+''' Main program '''
+####################################################################
 
 def main():
     print('\n******************************')
@@ -397,6 +414,11 @@ def main():
             usage()
             sys.exit(2)
 
+
+####################################################################
+''' Class to read map files (Horiba LabSpec5) '''
+####################################################################
+
 class readMap:
 
     def __init__(self, file):
@@ -420,6 +442,11 @@ class readMap:
             print(' File: ' + file + ' not found\n')
             sys.exit(2)
 
+
+####################################################################
+''' Class to read individual spectra '''
+####################################################################
+
 class readSingleSpectra:
     def __init__(self, file):
         if exists(file):
@@ -430,6 +457,11 @@ class readSingleSpectra:
         else:
             print(' File: ' + file + ' not found\n')
             sys.exit(2)
+
+
+####################################################################
+''' Class to define peaks and their properties '''
+####################################################################
 
 class Peak:
     ### Define the typology of the peak
@@ -458,6 +490,10 @@ class Peak:
             for i in range (0,defPar.NumPeaks):
                 self.peak[i] = PseudoVoigtModel(prefix="p"+ str(i) +"_")
             self.typec = "PVoigt"
+
+####################################################################
+''' Routine to generate initialization parameter file '''
+####################################################################
 
 def genInitPar():
     if exists(defPar.inputParFile):
@@ -489,6 +525,10 @@ def genInitPar():
         print(' Input paramters saved in: ' + defPar.inputParFile)
 
 
+####################################################################
+''' Lists the program usage '''
+####################################################################
+
 def usage():
     print('Usage: \n\n Single file:')
     print(' python multifit.py -f filename n\n')
@@ -505,7 +545,10 @@ def usage():
     print(' n = 0: PseudoVoigt 1: Gaussian 2: Lorentzian 3: Voigt\n')
 
 
+####################################################################
 ''' Add blank line at the end of the summary spreadsheet '''
+####################################################################
+
 def addBlankLine(file):
     if(defPar.ascii == True):
         with open(file, "a") as sum_file:
@@ -516,6 +559,9 @@ def addBlankLine(file):
         pp.append([' '])
         WW.save(file)
 
+####################################################################
+''' Main initialization routine '''
+####################################################################
 
 if __name__ == "__main__":
     sys.exit(main())
