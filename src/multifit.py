@@ -20,15 +20,19 @@ from multiprocessing import Pool
 import multiprocessing as mp
 
 class defPar:
-    version = '20150305a'
+    version = '20150305c'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
-    ### Name input paramter file
-    inputParFile = 'input_parameters.xlsx'
-    ### Plot initial fitting curve
-    initCurve = True
     ### Save results as ASCII?
     ascii = False
+    ### Name input paramter file
+    inputParFile = 'input_parameters.xlsx'
+    if(ascii == True):
+        summary = 'summary.txt'        # Save summary fitting results (ASCII)
+    else:
+        summary = 'summary.xlsx'        # Save summary fitting results (Excel)
+    ### Plot initial fitting curve
+    initCurve = True
     ### Multiprocessing?
     multiproc = True
 
@@ -95,12 +99,7 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot):
     outfile = 'fit_' + file         # Save individual fitting results
     plotfile = os.path.splitext(file)[0] + '_fit.png'   # Save plot as image
 
-    if(defPar.ascii == True):
-        summary = 'summary.txt'        # Save summary fitting results (ASCII)
-    else:
-        summary = 'summary.xlsx'        # Save summary fitting results (Excel)
-
-    if os.path.isfile(summary) == False:
+    if os.path.isfile(defPar.summary) == False:
         header = True
     else:
         header = False
@@ -133,7 +132,7 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot):
 
     ### Use this for summary in ASCII
     if(defPar.ascii == True):
-        with open(summary, "a") as sum_file:
+        with open(defPar.summary, "a") as sum_file:
             if header == True:
                 sum_file.write('File\tx1\ty1\tiD1\tiD4\tiD5\tiG\twG\tD5G\t(D4+D5)/G\tD1/G\t%Gaussian\tfit\tChi-square\tred-chi-sq\n')
             sum_file.write('{:}\t'.format(file))
@@ -168,9 +167,9 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot):
                                  'D1/G', 'D5 %Gaussian','D1 %Gaussian', 'G %Gaussian', 'Fit', \
                                  'Chi-square', 'Reduced Chi-square']
             pp.append(summaryHeader)
-            WW.save(summary)
+            WW.save(defPar.summary)
 
-        WW = px.load_workbook(summary)
+        WW = px.load_workbook(defPar.summary)
         pp = WW.active
 
         summaryResults = ['{:}'.format(file), float('{:}'.format(x1)), float('{:}'.format(y1)), \
@@ -191,7 +190,7 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot):
         summaryResults.extend([p.typec])
         summaryResults.extend([float('{:f}'.format(out.chisqr)), float('{:f}'.format(out.redchi))])
         pp.append(summaryResults)
-        WW.save(summary)
+        WW.save(defPar.summary)
 
 
     if (drawMap == False):
@@ -295,8 +294,6 @@ class Map:
         #    print('*** Close plot to quit ***\n')
         #    plt.show()
 
-
-
 ###################
 
 def main():
@@ -336,6 +333,7 @@ def main():
                     if (f != 'summary.txt'):
                         rs = readSingleSpectra(f)
                         calculate(rs.x, rs.y, '0', '0', rs.ymax, f, type, False, False)
+            addBlankLine(defPar.summary)
         
         elif o in ("-f", "--file"):
             file = str(sys.argv[2])
@@ -505,6 +503,18 @@ def usage():
     print(' Create new input paramter file (xlsx): ')
     print(' python multifit.py -i n\n')
     print(' n = 0: PseudoVoigt 1: Gaussian 2: Lorentzian 3: Voigt\n')
+
+
+''' Add blank line at the end of the summary spreadsheet '''
+def addBlankLine(file):
+    if(defPar.ascii == True):
+        with open(file, "a") as sum_file:
+            sum_file.write('\n')
+    else:
+        WW = px.load_workbook(file)
+        pp=WW.active
+        pp.append([' '])
+        WW.save(file)
 
 
 if __name__ == "__main__":
