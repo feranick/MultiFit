@@ -24,11 +24,11 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '20150305e'
+    version = '20150305g'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Save results as ASCII?
-    ascii = True
+    ascii = False
     ### Name input paramter file
     inputParFile = 'input_parameters.xlsx'
     if(ascii == True):
@@ -172,13 +172,10 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot, lab):
             pp=WW.active
             pp.title='Summary'
             summaryHeader = ['File', 'x1', 'y1', 'iD1', 'iD4', 'iD5', 'iG', 'wG', 'D5G', '(D4+D5)/G', \
-                                 'D1/G', 'D5 %Gaussian','D1 %Gaussian', 'G %Gaussian', 'Fit', \
-                                 'Chi-square', 'Reduced Chi-square', 'Label']
+                 'D1/G', 'D5 %Gaussian','D1 %Gaussian', 'G %Gaussian', 'Fit', \
+                 'Chi-square', 'Reduced Chi-square', 'Label']
             pp.append(summaryHeader)
             WW.save(defPar.summary)
-
-        WW = px.load_workbook(defPar.summary)
-        pp = WW.active
 
         summaryResults = ['{:}'.format(file), float('{:}'.format(x1)), float('{:}'.format(y1)), \
                         float('{:f}'.format(out.best_values['p2_amplitude'])), \
@@ -197,10 +194,14 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot, lab):
             summaryResults.extend(['{:}'.format(type-1), '{:}'.format(type-1), '{:}'.format(type-1)])
         summaryResults.extend([p.typec])
         summaryResults.extend([float('{:f}'.format(out.chisqr)), float('{:f}'.format(out.redchi)), lab])
+
+
+        WW = px.load_workbook(defPar.summary)
+        pp = WW.active
         pp.append(summaryResults)
         WW.save(defPar.summary)
-
-
+        
+        
     if (drawMap == False):
         ### Plot optimal fit and individial components
         fig = plt.figure()
@@ -426,23 +427,24 @@ def main():
 class readMap:
 
     def __init__(self, file):
-        if exists(file):
-            ### Load data
-            self.num_lines = sum(1 for line in open(file))-1
-            data = loadtxt(file)
+        try:
+            with open(file) as openfile:
+                ### Load data
+                self.num_lines = sum(1 for line in openfile)-1
+                data = loadtxt(file)
         
-            self.x1 = [None]*(self.num_lines)
-            self.y1 = [None]*(self.num_lines)
-            self.y = [None]*(self.num_lines)
-            self.ymax = [None]*(self.num_lines)
+                self.x1 = [None]*(self.num_lines)
+                self.y1 = [None]*(self.num_lines)
+                self.y = [None]*(self.num_lines)
+                self.ymax = [None]*(self.num_lines)
     
-            self.x = data[0, 2:]
-            for i in range(0, self.num_lines):
-                self.x1[i] = data[i+1, 0]
-                self.y1[i] = data[i+1, 1]
-                self.y[i] = data[i+1, 2:]
-                self.ymax[i] = max(self.y[i])
-        else:
+                self.x = data[0, 2:]
+                for i in range(0, self.num_lines):
+                    self.x1[i] = data[i+1, 0]
+                    self.y1[i] = data[i+1, 1]
+                    self.y[i] = data[i+1, 2:]
+                    self.ymax[i] = max(self.y[i])
+        except:
             print(' File: ' + file + ' not found\n')
             sys.exit(2)
 
@@ -453,12 +455,13 @@ class readMap:
 
 class readSingleSpectra:
     def __init__(self, file):
-        if exists(file):
-            data = loadtxt(file)
-            self.x = data[:, 0]
-            self.y = data[:, 1]
-            self.ymax = max(self.y)
-        else:
+        try:
+            with open(file):
+                data = loadtxt(file)
+                self.x = data[:, 0]
+                self.y = data[:, 1]
+                self.ymax = max(self.y)
+        except:
             print(' File: ' + file + ' not found\n')
             sys.exit(2)
 
@@ -555,8 +558,11 @@ def usage():
 
 def addBlankLine(file):
     if(defPar.ascii == True):
-        with open(file, "a") as sum_file:
-            sum_file.write('\n')
+        try:
+            with open(file, "a") as sum_file:
+                sum_file.write('\n')
+        except:
+            print "File busy!"
     else:
         WW = px.load_workbook(file)
         pp=WW.active
