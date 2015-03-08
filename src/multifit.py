@@ -24,7 +24,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '20150305g'
+    version = '20150306a'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Save results as ASCII?
@@ -64,16 +64,8 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot, lab):
     print (' Fitting with ' + str(defPar.NumPeaks) + ' (' + p.typec + ') peaks')
     ### Initialize parameters for fit.
     pars = p.peak[0].make_params()
-    pars['p0_center'].set(inv[2,1], min = inv[3,1], max = inv[4,1] )
-    pars['p0_sigma'].set(inv[5,1], min = inv[6,1], max = inv [7,1])
-    pars['p0_amplitude'].set(inv[8,1]*ymax*80, min=inv[9,1], max = inv[10,1])
-    if (type ==0):
-        pars['p0_fraction'].set(inv[11,1], min = inv[12,1], max = inv[13,1])
-    if (type ==3):
-        pars['p0_gamma'].set(inv[5,1])
 
-
-    for i in range (1, defPar.NumPeaks):
+    for i in range (0, defPar.NumPeaks):
         if fpeak[i]!=0:
             pars.update(p.peak[i].make_params())
             pars['p{:}_center'.format(str(i))].set(inv[2,i+1], min = inv[3,i+1], max = inv[4,i+1])
