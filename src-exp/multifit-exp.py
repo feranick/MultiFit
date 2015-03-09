@@ -24,7 +24,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '20150306a-exp'
+    version = '20150309a-exp'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Save results as ASCII?
@@ -69,8 +69,13 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot, lab):
         if fpeak[i]!=0:
             #pars.update(p.peak[i].make_params())
 
-            pars += p.peak[i].guess(y[ix(x,inv[2,i+1]-inv[5,i+1]):ix(x,inv[2,i+1]+inv[5,i+1])] , \
-                    x=x[ix(x,inv[2,i+1]-inv[5,i+1]):ix(x,inv[2,i+1]+inv[5,i+1])])
+            fac = 2
+            
+            print(' Peak {:}'.format(str(i)) +': [' + str(inv[2,i+1]-fac*inv[5,i+1]) + ', ' + \
+                  str(inv[2,i+1]+fac*inv[5,i+1]) + ']')
+
+            pars += p.peak[i].guess(y[ix(x,inv[2,i+1]-fac*inv[5,i+1]):ix(x,inv[2,i+1]+fac*inv[5,i+1])] , \
+                    x=x[ix(x,inv[2,i+1]-fac*inv[5,i+1]):ix(x,inv[2,i+1]+fac*inv[5,i+1])])
             
             
             pars['p{:}_center'.format(str(i))].set(min = inv[3,i+1], max = inv[4,i+1])
@@ -512,14 +517,14 @@ def genInitPar():
         pp.title='InputParameters'
     
         initPar = [['name', 'D4', 'D5', 'D1', 'D3a', 'D3b', 'G', 'D2'], \
-               ['activate peak',1,1,1,1,1,1,0], \
-               ['center',1160,1260,1330,1400,1500,1590,1680], \
-               ['center min','',1240,'','',1500,'',''], \
-               ['center max','',1275,'',1440,'','',''], \
-               ['sigma',45,45,80,40,40,40,40], \
-               ['sigma min',40,40,40,20,20,20,30], \
+               ['activate peak',1,1,1,0,1,1,0], \
+               ['center',1160,1250,1330,1400,1470,1590,1680], \
+               ['center min','',1240,'','','','',''], \
+               ['center max','',1275,'','','','',''], \
+               ['sigma',20,20,40,20,10,20,20], \
+               ['sigma min',10,10,10,10,5,10,10], \
                ['sigma max',50,50,50,50,50,50,50], \
-               ['amplitude',0.1,0.2,1,0.1,0.1,0.8,0.1], \
+               ['amplitude','','','','','','',''], \
                ['ampl. min',0,0,0,0,0,0,0], \
                ['ampl. max','','','','','','',''], \
                ['fraction',0.5,0.5,0.5,0.5,0.5,0.5,0.5], \
