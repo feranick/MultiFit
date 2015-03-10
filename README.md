@@ -90,3 +90,14 @@ The current version has a class that opens the Raman map (Horiba LabSpec5,
 saved in text file), and fits each spectra in the map. It does not produce (yet) 
 a visual map of the results, which are saved as (x, y, D5G). Future releases
 will allow for more flexibility as well as plotting.
+
+=========================================================================
+
+Version history:
+================
+
+v.2: It uses a peak guessing algorithm, for more accurate results.  
+
+v.1-20150306a: It uses a static initialization for the fitting parameters
+It is fairly universal, in that it can be used for any spectra. 
+
