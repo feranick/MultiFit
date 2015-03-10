@@ -24,17 +24,13 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '20150309a-exp'
+    version = '20150309b-exp'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
-    ### Save results as ASCII?
-    ascii = False
     ### Name input paramter file
     inputParFile = 'input_parameters.xlsx'
-    if(ascii == True):
-        summary = 'summary.txt'        # Save summary fitting results (ASCII)
-    else:
-        summary = 'summary.xlsx'        # Save summary fitting results (Excel)
+    # Save summary fitting results
+    summary = 'summary.csv'
     ### Plot initial fitting curve
     initCurve = True
     ### Multiprocessing?
@@ -116,7 +112,6 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot, lab):
         header = False
         print('\nFit successful: ' + str(out.success))
 
-
     if (drawMap == False):
         if (fpeak[1] == 1 & fpeak[2] == 1 & fpeak[5] == 1):
             print('D5/G = {:f}'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
@@ -141,69 +136,32 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot, lab):
                     text_file.write('\nReduced Chi-square: {:}\n'.format(out.redchi))
                 '''
 
-    ### Use this for summary in ASCII
-    if(defPar.ascii == True):
-        with open(defPar.summary, "a") as sum_file:
-            if header == True:
-                sum_file.write('File\tx1\ty1\tiD1\tiD4\tiD5\tiG\twG\tD5G\t(D4+D5)/G\tD1/G\t%Gaussian\tfit\tChi-square\tred-chi-sq\n')
-            sum_file.write('{:}\t'.format(file))
-            sum_file.write('{:}\t'.format(x1))
-            sum_file.write('{:}\t'.format(y1))
-            sum_file.write('{:f}\t'.format(out.best_values['p2_amplitude']))
-            sum_file.write('{:f}\t'.format(out.best_values['p0_amplitude']))
-            sum_file.write('{:f}\t'.format(out.best_values['p1_amplitude']))
-            sum_file.write('{:f}\t'.format(out.best_values['p5_amplitude']))
-            sum_file.write('{:f}\t'.format(out.best_values['p5_sigma']*2))
-            sum_file.write('{:f}\t'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
-            sum_file.write('{:f}\t'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']))
-            sum_file.write('{:f}\t'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude']))
-            if type ==0:
-                sum_file.write('{:f}\t'.format(out.best_values['p1_fraction']))
-                sum_file.write('{:f}\t'.format(out.best_values['p2_fraction']))
-                sum_file.write('{:f}\t'.format(out.best_values['p5_fraction']))
-            else:
-                for i in range(0,3):
-                    sum_file.write('{:}\t'.format(type-1))
-                sum_file.write('{:}\t'.format(p.typec))
-            sum_file.write('{:}\t'.format(out.chisqr))
-            sum_file.write('{:}\t'.format(out.redchi))
-            sum_file.write('{:}\n'.format(lab))
-
-    ### Use this for summary in XLSX
-    else:
+    ### Write Summary
+    with open(defPar.summary, "a") as sum_file:
         if header == True:
-            WW=px.Workbook()
-            pp=WW.active
-            pp.title='Summary'
-            summaryHeader = ['File', 'x1', 'y1', 'iD1', 'iD4', 'iD5', 'iG', 'wG', 'D5G', '(D4+D5)/G', \
-                 'D1/G', 'D5 %Gaussian','D1 %Gaussian', 'G %Gaussian', 'Fit', \
-                 'Chi-square', 'Reduced Chi-square', 'Label']
-            pp.append(summaryHeader)
-            WW.save(defPar.summary)
-
-        summaryResults = ['{:}'.format(file), float('{:}'.format(x1)), float('{:}'.format(y1)), \
-                        float('{:f}'.format(out.best_values['p2_amplitude'])), \
-                        float('{:f}'.format(out.best_values['p0_amplitude'])),
-                        float('{:f}'.format(out.best_values['p1_amplitude'])), \
-                        float('{:f}'.format(out.best_values['p5_amplitude'])), \
-                        float('{:f}'.format(out.best_values['p5_sigma']*2)), \
-                        float('{:f}'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude'])), \
-                        float('{:f}'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude'])), \
-                        float('{:f}'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude']))]
+            sum_file.write('File,x1,y1,iD1,iD4,iD5,iG,wG,D5G,(D4+D5)/G,D1/G,D5%Gaussian,D1%Gaussian,G%Gaussianfit,Chi-square,red-chi-sq,label\n')
+        sum_file.write('{:},'.format(file))
+        sum_file.write('{:},'.format(x1))
+        sum_file.write('{:},'.format(y1))
+        sum_file.write('{:f},'.format(out.best_values['p2_amplitude']))
+        sum_file.write('{:f},'.format(out.best_values['p0_amplitude']))
+        sum_file.write('{:f},'.format(out.best_values['p1_amplitude']))
+        sum_file.write('{:f},'.format(out.best_values['p5_amplitude']))
+        sum_file.write('{:f},'.format(out.best_values['p5_sigma']*2))
+        sum_file.write('{:f},'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
+        sum_file.write('{:f},'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']))
+        sum_file.write('{:f},'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude']))
         if type ==0:
-            summaryResults.extend([float('{:f}'.format(out.best_values['p1_fraction'])), \
-                                       float('{:f}'.format(out.best_values['p2_fraction'])), \
-                                       float('{:f}'.format(out.best_values['p5_fraction']))])
+            sum_file.write('{:f},'.format(out.best_values['p1_fraction']))
+            sum_file.write('{:f},'.format(out.best_values['p2_fraction']))
+            sum_file.write('{:f},'.format(out.best_values['p5_fraction']))
         else:
-            summaryResults.extend(['{:}'.format(type-1), '{:}'.format(type-1), '{:}'.format(type-1)])
-        summaryResults.extend([p.typec])
-        summaryResults.extend([float('{:f}'.format(out.chisqr)), float('{:f}'.format(out.redchi)), lab])
-
-
-        WW = px.load_workbook(defPar.summary)
-        pp = WW.active
-        pp.append(summaryResults)
-        WW.save(defPar.summary)
+            for i in range(0,3):
+                sum_file.write('{:},'.format(type-1))
+            sum_file.write('{:},'.format(p.typec))
+        sum_file.write('{:},'.format(out.chisqr))
+        sum_file.write('{:},'.format(out.redchi))
+        sum_file.write('{:}\n'.format(lab))
         
         
     if (drawMap == False):
@@ -562,17 +520,11 @@ def usage():
 ####################################################################
 
 def addBlankLine(file):
-    if(defPar.ascii == True):
-        try:
-            with open(file, "a") as sum_file:
-                sum_file.write('\n')
-        except:
-            print "File busy!"
-    else:
-        WW = px.load_workbook(file)
-        pp=WW.active
-        pp.append([' '])
-        WW.save(file)
+    try:
+        with open(file, "a") as sum_file:
+            sum_file.write('\n')
+    except:
+        print "File busy!"
 
 
 def ix(arrval, value):
