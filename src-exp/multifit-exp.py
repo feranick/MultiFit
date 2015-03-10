@@ -526,6 +526,9 @@ def addBlankLine(file):
     except:
         print "File busy!"
 
+####################################################################
+''' Finds data index for a given x value '''
+####################################################################
 
 def ix(arrval, value):
     #return index of array *at or below* value
