@@ -58,27 +58,22 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
 
 	p = Peak(type)
     print (' Fitting with ' + str(defPar.NumPeaks) + ' (' + p.typec + ') peaks')
-    ### Initialize parameters for fit.
     
+    ### Initialize parameters for fit.
     pars = p.peak[0].make_params()
     for i in range (0, defPar.NumPeaks):
         if fpeak[i]!=0:
-            #pars.update(p.peak[i].make_params())
 
             fac = 2
-            
             print(' Peak {:}'.format(str(i)) +': [' + str(inv[2,i+1]-fac*inv[5,i+1]) + ', ' + \
                   str(inv[2,i+1]+fac*inv[5,i+1]) + ']')
 
             pars += p.peak[i].guess(y[ix(x,inv[2,i+1]-fac*inv[5,i+1]):ix(x,inv[2,i+1]+fac*inv[5,i+1])] , \
                     x=x[ix(x,inv[2,i+1]-fac*inv[5,i+1]):ix(x,inv[2,i+1]+fac*inv[5,i+1])])
             
-            
             pars['p{:}_center'.format(str(i))].set(min = inv[3,i+1], max = inv[4,i+1])
             pars['p{:}_sigma'.format(str(i))].set(min = inv[6,i+1], max = inv [7,i+1])
-            
             pars['p{:}_amplitude'.format(str(i))].set(min=inv[9,i+1], max = inv[10,i+1])
-            
             if (type ==0):
                 pars['p{:}_fraction'.format(str(i))].set(min = inv[12,i+1], max = inv[13,i+1])
             if (type ==3):
