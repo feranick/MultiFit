@@ -24,7 +24,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20150311b'
+    version = '2-20150311c'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -302,9 +302,7 @@ def main():
         print('\n Multiprocessing disabled\n')
     for o, a in opts:
         if o in ("-b" , "--batch"):
-            
-            #type = int(sys.argv[2])
-        
+            type = int(sys.argv[2])
             i = 0
             if(defPar.multiproc == True):
                 p = Pool(mp.cpu_count())
