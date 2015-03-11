@@ -24,7 +24,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20150311a'
+    version = '2-20150311b'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -285,6 +285,13 @@ def main():
         usage()
         sys.exit(2)
 
+    try:
+        type = sys.argv[2]
+    except:
+        # print help information and exit:
+        usage()
+        sys.exit(2)
+
     if not exists(defPar.inputParFile):
         print '\n Init parameter not found. Generating a new one...'
         genInitPar()
@@ -296,7 +303,8 @@ def main():
     for o, a in opts:
         if o in ("-b" , "--batch"):
             
-            type = int(sys.argv[2])
+            #type = int(sys.argv[2])
+        
             i = 0
             if(defPar.multiproc == True):
                 p = Pool(mp.cpu_count())
