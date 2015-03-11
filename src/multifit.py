@@ -24,7 +24,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20150310a-exp'
+    version = '2-20150310b-exp'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -66,6 +66,8 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
             #pars.update(p.peak[i].make_params())
 
             fac = 2
+            
+            #print x_ymax(x, yx, 1400)
             
             print(' Peak {:}'.format(str(i)) +': [' + str(inv[2,i+1]-fac*inv[5,i+1]) + ', ' + \
                   str(inv[2,i+1]+fac*inv[5,i+1]) + ']')
@@ -532,6 +534,12 @@ def ix(arrval, value):
     if value < min(arrval): return 0
     return max(where(arrval<=value)[0])
 
+####################################################################
+''' Returns the x coord corresponding to a ymax up to a max y '''
+####################################################################
+
+def x_ymax(x, y , y_max):
+    return x[y[0:ix(x, y_max)].argmax()]
 
 ####################################################################
 ''' Main initialization routine '''
