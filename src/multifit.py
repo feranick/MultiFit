@@ -24,7 +24,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20150309c'
+    version = '2-20150311a'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -40,7 +40,7 @@ class defPar:
 ''' Main routine to perform and plot the fit '''
 ####################################################################
 
-def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot, lab):
+def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
     
     ### Load initialization parameters from xlsx file.
     W = px.load_workbook(defPar.inputParFile, use_iterators = True)
@@ -308,7 +308,7 @@ def main():
                 for f in glob.glob('*.txt'):
                     if (f != 'summary.txt'):
                         rs = readSingleSpectra(f)
-                        p.apply_async(calculate, args=(rs.x, rs.y, '0', '0', rs.ymax, f, type, False, False, i))
+                        p.apply_async(calculate, args=(rs.x, rs.y, '0', '0', f, type, False, False, i))
                         i += 1
                 p.close()
                 p.join()
@@ -316,7 +316,7 @@ def main():
                 for f in glob.glob('*.txt'):
                     if (f != 'summary.txt'):
                         rs = readSingleSpectra(f)
-                        calculate(rs.x, rs.y, '0', '0', rs.ymax, f, type, False, False, i)
+                        calculate(rs.x, rs.y, '0', '0', f, type, False, False, i)
                         i += 1
             addBlankLine(defPar.summary)
         
@@ -324,7 +324,7 @@ def main():
             file = str(sys.argv[2])
             type = int(sys.argv[3])
             rs = readSingleSpectra(file)
-            calculate(rs.x, rs.y, '0', '0', rs.ymax, file, type, False, True, '')
+            calculate(rs.x, rs.y, '0', '0', file, type, False, True, '')
 
 
         elif o in ("-p", "--plot"):
@@ -358,7 +358,7 @@ def main():
             if(defPar.multiproc == True):
                 p = Pool(mp.cpu_count())
                 for i in range (1, rm.num_lines):
-                    p.apply_async(calculate, args=(rm.x, rm.y[i], rm.x1[i], rm.y1[i], rm.ymax[i], file, type, True, False, ''))
+                    p.apply_async(calculate, args=(rm.x, rm.y[i], rm.x1[i], rm.y1[i], file, type, True, False, ''))
                 p.close()
                 p.join()
 
@@ -366,7 +366,7 @@ def main():
 
             else:
                 for i in range (1, rm.num_lines):
-                    calculate(rm.x, rm.y[i], rm.x1[i], rm.y1[i], rm.ymax[i], file, type, True, False, '')
+                    calculate(rm.x, rm.y[i], rm.x1[i], rm.y1[i], file, type, True, False, '')
                 #map.draw(os.path.splitext(file)[0] + '_map.txt', True)
 
         elif o in ("-t", "--test"):
@@ -399,14 +399,12 @@ class readMap:
                 self.x1 = [None]*(self.num_lines)
                 self.y1 = [None]*(self.num_lines)
                 self.y = [None]*(self.num_lines)
-                self.ymax = [None]*(self.num_lines)
-    
+                
                 self.x = data[0, 2:]
                 for i in range(0, self.num_lines):
                     self.x1[i] = data[i+1, 0]
                     self.y1[i] = data[i+1, 1]
                     self.y[i] = data[i+1, 2:]
-                    self.ymax[i] = max(self.y[i])
         except:
             print(' File: ' + file + ' not found\n')
             sys.exit(2)
@@ -423,7 +421,6 @@ class readSingleSpectra:
                 data = loadtxt(file)
                 self.x = data[:, 0]
                 self.y = data[:, 1]
-                self.ymax = max(self.y)
         except:
             print(' File: ' + file + ' not found\n')
             sys.exit(2)
