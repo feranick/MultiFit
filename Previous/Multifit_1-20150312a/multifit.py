@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 ###=============================================================
-### Multifit 2
+### Multifit
 ### Nicola Ferralis <feranick@hotmail.com>
 ### The entire code is covered by GNU Public License (GPL) v.3
 ###=============================================================
@@ -24,13 +24,17 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20150312a'
+    version = '1-20150312a'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
+    ### Save results as ASCII?
+    ascii = False
     ### Name input paramter file
     inputParFile = 'input_parameters.xlsx'
-    # Save summary fitting results
-    summary = 'summary.csv'
+    if(ascii == True):
+        summary = 'summary.txt'        # Save summary fitting results (ASCII)
+    else:
+        summary = 'summary.xlsx'        # Save summary fitting results (Excel)
     ### Plot initial fitting curve
     initCurve = True
     ### Multiprocessing?
@@ -40,7 +44,7 @@ class defPar:
 ''' Main routine to perform and plot the fit '''
 ####################################################################
 
-def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
+def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot, lab):
     
     ### Load initialization parameters from xlsx file.
     W = px.load_workbook(defPar.inputParFile, use_iterators = True)
@@ -58,24 +62,17 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
 
 	p = Peak(type)
     print (' Fitting with ' + str(defPar.NumPeaks) + ' (' + p.typec + ') peaks')
-    
     ### Initialize parameters for fit.
     pars = p.peak[0].make_params()
+
     for i in range (0, defPar.NumPeaks):
         if fpeak[i]!=0:
-
-            fac = 2
-            print(' Peak {:}'.format(str(i)) +': [' + str(inv[2,i+1]-fac*inv[5,i+1]) + ', ' + \
-                  str(inv[2,i+1]+fac*inv[5,i+1]) + ']')
-
-            pars += p.peak[i].guess(y[ix(x,inv[2,i+1]-fac*inv[5,i+1]):ix(x,inv[2,i+1]+fac*inv[5,i+1])] , \
-                    x=x[ix(x,inv[2,i+1]-fac*inv[5,i+1]):ix(x,inv[2,i+1]+fac*inv[5,i+1])])
-            
-            pars['p{:}_center'.format(str(i))].set(min = inv[3,i+1], max = inv[4,i+1])
-            pars['p{:}_sigma'.format(str(i))].set(min = inv[6,i+1], max = inv [7,i+1])
-            pars['p{:}_amplitude'.format(str(i))].set(min=inv[9,i+1], max = inv[10,i+1])
+            pars.update(p.peak[i].make_params())
+            pars['p{:}_center'.format(str(i))].set(inv[2,i+1], min = inv[3,i+1], max = inv[4,i+1])
+            pars['p{:}_sigma'.format(str(i))].set(inv[5,i+1], min = inv[6,i+1], max = inv [7,i+1])
+            pars['p{:}_amplitude'.format(str(i))].set(inv[8,i+1]*ymax*80, min=inv[9,i+1], max = inv[10,i+1])
             if (type ==0):
-                pars['p{:}_fraction'.format(str(i))].set(min = inv[12,i+1], max = inv[13,i+1])
+                pars['p{:}_fraction'.format(str(i))].set(inv[11,i+1], min = inv[12,i+1], max = inv[13,i+1])
             if (type ==3):
                 pars['p{:}_gamma'.format(str(i))].set(inv[5,i+1])
 
@@ -84,7 +81,7 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
     mod = p.peak[0]
     for i in range (1,defPar.NumPeaks):
         if fpeak[i]!=0:
-            mod += p.peak[i]
+            mod = mod + p.peak[i]
 
     ### Initialize prefitting curves
     init = mod.eval(pars, x=x)
@@ -106,6 +103,7 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
     else:
         header = False
         print('\nFit successful: ' + str(out.success))
+
 
     if (drawMap == False):
         if (fpeak[1] == 1 & fpeak[2] == 1 & fpeak[5] == 1):
@@ -131,33 +129,69 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
                     text_file.write('\nReduced Chi-square: {:}\n'.format(out.redchi))
                 '''
 
-    ### Write Summary
-    with open(defPar.summary, "a") as sum_file:
+    ### Use this for summary in ASCII
+    if(defPar.ascii == True):
+        with open(defPar.summary, "a") as sum_file:
+            if header == True:
+                sum_file.write('File\tx1\ty1\tiD1\tiD4\tiD5\tiG\twG\tD5G\t(D4+D5)/G\tD1/G\t%Gaussian\tfit\tChi-square\tred-chi-sq\n')
+            sum_file.write('{:}\t'.format(file))
+            sum_file.write('{:}\t'.format(x1))
+            sum_file.write('{:}\t'.format(y1))
+            sum_file.write('{:f}\t'.format(out.best_values['p2_amplitude']))
+            sum_file.write('{:f}\t'.format(out.best_values['p0_amplitude']))
+            sum_file.write('{:f}\t'.format(out.best_values['p1_amplitude']))
+            sum_file.write('{:f}\t'.format(out.best_values['p5_amplitude']))
+            sum_file.write('{:f}\t'.format(out.best_values['p5_sigma']*2))
+            sum_file.write('{:f}\t'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
+            sum_file.write('{:f}\t'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']))
+            sum_file.write('{:f}\t'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude']))
+            if type ==0:
+                sum_file.write('{:f}\t'.format(out.best_values['p1_fraction']))
+                sum_file.write('{:f}\t'.format(out.best_values['p2_fraction']))
+                sum_file.write('{:f}\t'.format(out.best_values['p5_fraction']))
+            else:
+                for i in range(0,3):
+                    sum_file.write('{:}\t'.format(type-1))
+                sum_file.write('{:}\t'.format(p.typec))
+            sum_file.write('{:}\t'.format(out.chisqr))
+            sum_file.write('{:}\t'.format(out.redchi))
+            sum_file.write('{:}\n'.format(lab))
+
+    ### Use this for summary in XLSX
+    else:
         if header == True:
-            sum_file.write('File,D5G,(D4+D5)/G,HC,iD1,iD4,iD5,iG,wG,D1/G,D5%Gaussian,D1%Gaussian,G%Gaussianfit,Chi-square,red-chi-sq,x1,y1,label\n')
-        sum_file.write('{:},'.format(file))
-        sum_file.write('{:f},'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
-        sum_file.write('{:f},'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']))
-        sum_file.write('{:f},'.format(0))
-        sum_file.write('{:f},'.format(out.best_values['p2_amplitude']))
-        sum_file.write('{:f},'.format(out.best_values['p0_amplitude']))
-        sum_file.write('{:f},'.format(out.best_values['p1_amplitude']))
-        sum_file.write('{:f},'.format(out.best_values['p5_amplitude']))
-        sum_file.write('{:f},'.format(out.best_values['p5_sigma']*2))
-        sum_file.write('{:f},'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude']))
+            WW=px.Workbook()
+            pp=WW.active
+            pp.title='Summary'
+            summaryHeader = ['File', 'x1', 'y1', 'iD1', 'iD4', 'iD5', 'iG', 'wG', 'D5G', '(D4+D5)/G', \
+                 'D1/G', 'D5 %Gaussian','D1 %Gaussian', 'G %Gaussian', 'Fit', \
+                 'Chi-square', 'Reduced Chi-square', 'Label']
+            pp.append(summaryHeader)
+            WW.save(defPar.summary)
+
+        summaryResults = ['{:}'.format(file), float('{:}'.format(x1)), float('{:}'.format(y1)), \
+                        float('{:f}'.format(out.best_values['p2_amplitude'])), \
+                        float('{:f}'.format(out.best_values['p0_amplitude'])),
+                        float('{:f}'.format(out.best_values['p1_amplitude'])), \
+                        float('{:f}'.format(out.best_values['p5_amplitude'])), \
+                        float('{:f}'.format(out.best_values['p5_sigma']*2)), \
+                        float('{:f}'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude'])), \
+                        float('{:f}'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude'])), \
+                        float('{:f}'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude']))]
         if type ==0:
-            sum_file.write('{:f},'.format(out.best_values['p1_fraction']))
-            sum_file.write('{:f},'.format(out.best_values['p2_fraction']))
-            sum_file.write('{:f},'.format(out.best_values['p5_fraction']))
+            summaryResults.extend([float('{:f}'.format(out.best_values['p1_fraction'])), \
+                                       float('{:f}'.format(out.best_values['p2_fraction'])), \
+                                       float('{:f}'.format(out.best_values['p5_fraction']))])
         else:
-            for i in range(0,3):
-                sum_file.write('{:},'.format(type-1))
-            sum_file.write('{:},'.format(p.typec))
-        sum_file.write('{:},'.format(out.chisqr))
-        sum_file.write('{:},'.format(out.redchi))
-        sum_file.write('{:},'.format(x1))
-        sum_file.write('{:},'.format(y1))
-        sum_file.write('{:}\n'.format(lab))
+            summaryResults.extend(['{:}'.format(type-1), '{:}'.format(type-1), '{:}'.format(type-1)])
+        summaryResults.extend([p.typec])
+        summaryResults.extend([float('{:f}'.format(out.chisqr)), float('{:f}'.format(out.redchi)), lab])
+
+
+        WW = px.load_workbook(defPar.summary)
+        pp = WW.active
+        pp.append(summaryResults)
+        WW.save(defPar.summary)
         
         
     if (drawMap == False):
@@ -167,7 +201,6 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
         ax.plot(x, y, label='data')
         if(defPar.initCurve == True):
             ax.plot(x, init, 'k--', label='initial')
-        
         ax.plot(x, out.best_fit, 'r-', label='fit')
         y0 = p.peak[0].eval(x = x, **out.best_values)
         ax.plot(x,y0,'g')
@@ -308,7 +341,7 @@ def main():
                 for f in glob.glob('*.txt'):
                     if (f != 'summary.txt'):
                         rs = readSingleSpectra(f)
-                        p.apply_async(calculate, args=(rs.x, rs.y, '0', '0', f, type, False, False, i))
+                        p.apply_async(calculate, args=(rs.x, rs.y, '0', '0', rs.ymax, f, type, False, False, i))
                         i += 1
                 p.close()
                 p.join()
@@ -316,7 +349,7 @@ def main():
                 for f in glob.glob('*.txt'):
                     if (f != 'summary.txt'):
                         rs = readSingleSpectra(f)
-                        calculate(rs.x, rs.y, '0', '0', f, type, False, False, i)
+                        calculate(rs.x, rs.y, '0', '0', rs.ymax, f, type, False, False, i)
                         i += 1
             addBlankLine(defPar.summary)
         
@@ -329,7 +362,7 @@ def main():
             file = str(sys.argv[2])
             type = int(sys.argv[3])
             rs = readSingleSpectra(file)
-            calculate(rs.x, rs.y, '0', '0', file, type, False, True, '')
+            calculate(rs.x, rs.y, '0', '0', rs.ymax, file, type, False, True, '')
 
 
         elif o in ("-p", "--plot"):
@@ -368,7 +401,7 @@ def main():
             if(defPar.multiproc == True):
                 p = Pool(mp.cpu_count())
                 for i in range (1, rm.num_lines):
-                    p.apply_async(calculate, args=(rm.x, rm.y[i], rm.x1[i], rm.y1[i], file, type, True, False, ''))
+                    p.apply_async(calculate, args=(rm.x, rm.y[i], rm.x1[i], rm.y1[i], rm.ymax[i], file, type, True, False, ''))
                 p.close()
                 p.join()
 
@@ -376,7 +409,7 @@ def main():
 
             else:
                 for i in range (1, rm.num_lines):
-                    calculate(rm.x, rm.y[i], rm.x1[i], rm.y1[i], file, type, True, False, '')
+                    calculate(rm.x, rm.y[i], rm.x1[i], rm.y1[i], rm.ymax[i], file, type, True, False, '')
                 #map.draw(os.path.splitext(file)[0] + '_map.txt', True)
 
         elif o in ("-t", "--test"):
@@ -409,12 +442,14 @@ class readMap:
                 self.x1 = [None]*(self.num_lines)
                 self.y1 = [None]*(self.num_lines)
                 self.y = [None]*(self.num_lines)
-                
+                self.ymax = [None]*(self.num_lines)
+    
                 self.x = data[0, 2:]
                 for i in range(0, self.num_lines):
                     self.x1[i] = data[i+1, 0]
                     self.y1[i] = data[i+1, 1]
                     self.y[i] = data[i+1, 2:]
+                    self.ymax[i] = max(self.y[i])
         except:
             print(' File: ' + file + ' not found\n')
             sys.exit(2)
@@ -431,6 +466,7 @@ class readSingleSpectra:
                 data = loadtxt(file)
                 self.x = data[:, 0]
                 self.y = data[:, 1]
+                self.ymax = max(self.y)
         except:
             print(' File: ' + file + ' not found\n')
             sys.exit(2)
@@ -482,14 +518,14 @@ def genInitPar():
         pp.title='InputParameters'
     
         initPar = [['name', 'D4', 'D5', 'D1', 'D3a', 'D3b', 'G', 'D2'], \
-               ['activate peak',1,1,1,0,1,1,0], \
-               ['center',1160,1250,1330,1400,1470,1590,1680], \
-               ['center min','',1240,'','','','',''], \
-               ['center max','',1275,'','','','',''], \
-               ['sigma',20,20,40,20,10,20,20], \
-               ['sigma min',10,10,10,10,5,10,10], \
+               ['activate peak',1,1,1,1,1,1,0], \
+               ['center',1160,1260,1330,1400,1500,1590,1680], \
+               ['center min','',1240,'','',1500,'',''], \
+               ['center max','',1275,'',1440,'','',''], \
+               ['sigma',45,45,80,40,40,40,40], \
+               ['sigma min',40,40,40,20,20,20,30], \
                ['sigma max',50,50,50,50,50,50,50], \
-               ['amplitude','','','','','','',''], \
+               ['amplitude',0.1,0.2,1,0.1,0.1,0.8,0.1], \
                ['ampl. min',0,0,0,0,0,0,0], \
                ['ampl. max','','','','','','',''], \
                ['fraction',0.5,0.5,0.5,0.5,0.5,0.5,0.5], \
@@ -518,7 +554,7 @@ def usage():
     print(' Create and save plot of batch data (no fit): ')
     print(' python multifit.py -p \n')
     print(' Create new input paramter file (xlsx): ')
-    print(' python multifit.py -i \n')
+    print(' python multifit.py -i n\n')
     print(' n = 0: PseudoVoigt 1: Gaussian 2: Lorentzian 3: Voigt\n')
 
 
@@ -527,21 +563,17 @@ def usage():
 ####################################################################
 
 def addBlankLine(file):
-    try:
-        with open(file, "a") as sum_file:
-            sum_file.write('\n')
-    except:
-        print "File busy!"
-
-####################################################################
-''' Finds data index for a given x value '''
-####################################################################
-
-def ix(arrval, value):
-    #return index of array *at or below* value
-    if value < min(arrval): return 0
-    return max(where(arrval<=value)[0])
-
+    if(defPar.ascii == True):
+        try:
+            with open(file, "a") as sum_file:
+                sum_file.write('\n')
+        except:
+            print "File busy!"
+    else:
+        WW = px.load_workbook(file)
+        pp=WW.active
+        pp.append([' '])
+        WW.save(file)
 
 ####################################################################
 ''' Main initialization routine '''
