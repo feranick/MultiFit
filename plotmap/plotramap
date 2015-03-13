@@ -1,0 +1,17 @@
+###=============================================================
+### Splot.gnuplot
+### Nicola Ferralis <feranick@hotmail.com>
+### The entire code is covered by GNU Public License (GPL) v.3
+###=============================================================
+
+#!/bin/bash
+
+gnuplot <<-EOF
+set pm3d map
+set xlabel "um"
+set ylabel "um"
+set zlabel "D5G"
+set title "Raman map: D5/G"
+splot '$1'
+q
+EOF
