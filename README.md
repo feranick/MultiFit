@@ -89,12 +89,10 @@ Fitting Raman maps (mapfit)
 The current version can open Raman maps (Horiba LabSpec5, saved as text files)
 and fits each spectra in the map. While it does not yet produce a visual 
 map of the results, these are saved as (x, y, D5G). Plotting maps from
-the computed results is possible through a GnuPlot script "plotramap"
-saved in /plotmap. You can run the script from the terminal:
+the computed results is possible through a R script "plotramap.R"
+saved in /plotrmap. You can run the script with R. Make sure the filename is
+correctly set as the inputFile variable in the R script.
 
-    ./plotramap filename
-
-where filename is the name of the Raman map from multifit.py.
 
 Future releases will allow for more flexibility as well as integrated plotting.
 
