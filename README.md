@@ -83,13 +83,15 @@ Support is not available.
 
 ========================================================================
 
-Experimental support for fitting Raman maps (mapfit)
-====================================================
+Fitting Raman maps (mapfit)
+========================================================================
 
-The current version has a class that opens the Raman map (Horiba LabSpec5, 
-saved in text file), and fits each spectra in the map. It does not produce (yet) 
-a visual map of the results, which are saved as (x, y, D5G). Future releases
-will allow for more flexibility as well as plotting.
+The current version can open Raman maps (Horiba LabSpec5, saved as text files)
+and fits each spectra in the map. While it does not yet produce a visual 
+map of the results, these are saved as (x, y, D5G). Plotting maps from
+the computed results is possible through a GnuPlot script saved in plot/
+
+Future releases will allow for more flexibility as well as integrated plotting.
 
 =========================================================================
 
