@@ -98,6 +98,5 @@ Version history:
 
 v.2: It uses a peak guessing algorithm, for more accurate results.  
 
-v.1-20150306a: It uses a static initialization for the fitting parameters
-It is fairly universal, in that it can be used for any spectra. 
+v.1: It uses a static initialization for the fitting parameters
 
