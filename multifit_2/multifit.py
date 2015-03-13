@@ -24,7 +24,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20150312d'
+    version = '2-20150313a'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -161,9 +161,9 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
         sum_file.close()
         
     if(drawMap == True):
-        with open(os.path.splitext(file)[0] + '_map.txt', "a") as coord_file:
-            coord_file.write('{:}\t'.format(x1))
-            coord_file.write('{:}\t'.format(y1))
+        with open(os.path.splitext(file)[0] + '_map.csv', "a") as coord_file:
+            coord_file.write('{:},'.format(x1))
+            coord_file.write('{:},'.format(y1))
             coord_file.write('{:}\n'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
             coord_file.close()
     else:
