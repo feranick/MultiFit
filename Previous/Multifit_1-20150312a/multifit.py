@@ -24,7 +24,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '1-20150312a'
+    version = '1-20150312b'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Save results as ASCII?
@@ -156,6 +156,7 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot, lab):
             sum_file.write('{:}\t'.format(out.chisqr))
             sum_file.write('{:}\t'.format(out.redchi))
             sum_file.write('{:}\n'.format(lab))
+            sum_file.close()
 
     ### Use this for summary in XLSX
     else:
@@ -235,6 +236,7 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot, lab):
                 map_file.write(float('{:}\t'.format(x1)))
                 map_file.write(float('{:}\t'.format(y1)))
                 map_file.write(float('{:}\n'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude'])))
+                map_file.close()
 
 	del p
 	del out
