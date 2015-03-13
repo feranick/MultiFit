@@ -6,12 +6,19 @@
 
 #!/bin/bash
 
-gnuplot <<-EOF
-set pm3d map
-set xlabel "um"
-set ylabel "um"
-set zlabel "D5G"
-set title "Raman map: D5/G"
-splot '$1'
-q
-EOF
+if [ "$1" = "" -o "$1" = "-h" ]; then
+        echo
+        echo " PlotRaMap v.20150313a"
+        echo " Usage: plotramap filename (with extension)"
+        echo
+else
+	gnuplot <<-EOF
+	set pm3d map
+	set xlabel "um"
+	set ylabel "um"
+	set zlabel "D5G"
+	set title "Raman map: D5/G"
+	splot '$1'
+	q
+	EOF
+fi
