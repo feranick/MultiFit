@@ -1,2 +1,0 @@
-Improve mapping
-Ability to select the type of results in maps.
