@@ -24,7 +24,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '1-20150312b'
+    version = '1-20150312d'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Save results as ASCII?
@@ -194,8 +194,14 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot, lab):
         pp.append(summaryResults)
         WW.save(defPar.summary)
         
-        
-    if (drawMap == False):
+    if(drawMap == True):
+        with open(os.path.splitext(file)[0] + '_map.txt', "a") as map_file:
+            map_file.write('{:}\t'.format(x1))
+            map_file.write('{:}\t'.format(y1))
+            map_file.write('{:}\n'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
+            map_file.close()
+
+    else:
         ### Plot optimal fit and individial components
         fig = plt.figure()
         ax = fig.add_subplot(111)
@@ -229,14 +235,6 @@ def calculate(x, y, x1, y1, ymax, file, type, drawMap, showPlot, lab):
             print('*** Close plot to quit ***\n')
             plt.show()
         plt.close()
-
-    if(drawMap == True):
-        with open(os.path.splitext(file)[0] + '_map.txt', "a") as map_file:
-            if(out.success == True):
-                map_file.write(float('{:}\t'.format(x1)))
-                map_file.write(float('{:}\t'.format(y1)))
-                map_file.write(float('{:}\n'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude'])))
-                map_file.close()
 
 	del p
 	del out
@@ -406,8 +404,7 @@ def main():
                     p.apply_async(calculate, args=(rm.x, rm.y[i], rm.x1[i], rm.y1[i], rm.ymax[i], file, type, True, False, ''))
                 p.close()
                 p.join()
-
-                map.draw(os.path.splitext(file)[0] + '_map.txt', True)
+            #map.draw(os.path.splitext(file)[0] + '_map.txt', True)
 
             else:
                 for i in range (1, rm.num_lines):
