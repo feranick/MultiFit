@@ -24,13 +24,15 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20150313b'
+    version = '2-20150313c'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
     inputParFile = 'input_parameters.xlsx'
     # Save summary fitting results
     summary = 'summary.csv'
+    # max reduced chi square for reliable results
+    redchi = 1.5
     ### Plot initial fitting curve
     initCurve = True
     ### Multiprocessing?
@@ -165,7 +167,7 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
         with open(os.path.splitext(file)[0] + '_map.csv', "a") as coord_file:
             coord_file.write('{:},'.format(x1))
             coord_file.write('{:},'.format(y1))
-            if (out.success == True):
+            if (out.success == True or out.redchi < defPar.redchi):
                 coord_file.write('{:}\n'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
             else:
                 coord_file.write('0\n')
