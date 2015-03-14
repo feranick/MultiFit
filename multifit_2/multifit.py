@@ -24,7 +24,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20150313a'
+    version = '2-20150313b'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -134,7 +134,7 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
     ### Write Summary
     with open(defPar.summary, "a") as sum_file:
         if header == True:
-            sum_file.write('File,D5G,(D4+D5)/G,HC,iD1,iD4,iD5,iG,wG,D1/G,D5%Gaussian,D1%Gaussian,G%Gaussianfit,Chi-square,red-chi-sq,x1,y1,label\n')
+            sum_file.write('File,D5G,(D4+D5)/G,HC,iD1,iD4,iD5,iG,wG,D1/G,D5%Gaussian,D1%Gaussian,G%Gaussianfit,Chi-square,red-chi-sq,Fit-OK,x1,y1,label\n')
         sum_file.write('{:},'.format(file))
         sum_file.write('{:f},'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
         sum_file.write('{:f},'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']))
@@ -155,6 +155,7 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
             sum_file.write('{:},'.format(p.typec))
         sum_file.write('{:},'.format(out.chisqr))
         sum_file.write('{:},'.format(out.redchi))
+        sum_file.write('{:},'.format(out.success))
         sum_file.write('{:},'.format(x1))
         sum_file.write('{:},'.format(y1))
         sum_file.write('{:}\n'.format(lab))
@@ -164,7 +165,10 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
         with open(os.path.splitext(file)[0] + '_map.csv', "a") as coord_file:
             coord_file.write('{:},'.format(x1))
             coord_file.write('{:},'.format(y1))
-            coord_file.write('{:}\n'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
+            if (out.success == True):
+                coord_file.write('{:}\n'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
+            else:
+                coord_file.write('0\n')
             coord_file.close()
     else:
         ### Plot optimal fit and individial components
