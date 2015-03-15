@@ -7,8 +7,8 @@
 ###=============================================================
 
 ### Uncomment this if for headless servers.
-#import matplotlib
-#matplotlib.use('Agg')
+import matplotlib
+matplotlib.use('Agg')
 ### ---------------------------------------
 from numpy import *
 from lmfit.models import GaussianModel, LorentzianModel, PseudoVoigtModel, VoigtModel
@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20150314a-exp'
+    version = '2-20150315a-exp'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -136,6 +136,41 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
                 '''
 
     ### Write Summary
+
+    initParHeader = ['File','D5G','(D4+D5)/G','HC','iD1','iD4','iD5','iG','wG','D1/G','D5%Gaussian', \
+                      'D1%Gaussian','G%Gaussianfit','Fit-type','Chi-square','red-chi-sq','Fit-OK','x1','y1','label']
+    initPar = [file, \
+            out.best_values['p1_amplitude']/out.best_values['p5_amplitude'], \
+            (out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude'], 0, \
+            out.best_values['p2_amplitude'], \
+            out.best_values['p0_amplitude'], \
+            out.best_values['p1_amplitude'], \
+            out.best_values['p5_amplitude'], \
+            out.best_values['p5_sigma']*2, \
+            out.best_values['p2_amplitude']/out.best_values['p5_amplitude'] ]
+    if type ==0:
+        initPar.extend([out.best_values['p1_fraction']])
+        initPar.extend([out.best_values['p2_fraction']])
+        initPar.extend([out.best_values['p5_fraction']])
+    else:
+        for i in range(0,3):
+            initPar.extend([type-1])
+    initPar.extend([p.typec])
+    initPar.extend([out.chisqr])
+    initPar.extend([out.redchi])
+    initPar.extend([out.success])
+    initPar.extend([x1])
+    initPar.extend([y1])
+    initPar.extend([lab])
+
+    with open(defPar.summary, "a") as sum_file:
+        csv_out=csv.writer(sum_file)
+        if header == True:
+            csv_out.writerow(initParHeader)
+        csv_out.writerow(initPar)
+        sum_file.close()
+
+    '''
     with open(defPar.summary, "a") as sum_file:
         if header == True:
             sum_file.write('File,D5G,(D4+D5)/G,HC,iD1,iD4,iD5,iG,wG,D1/G,D5%Gaussian,D1%Gaussian,G%Gaussianfit,Chi-square,red-chi-sq,Fit-OK,x1,y1,label\n')
@@ -164,6 +199,7 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
         sum_file.write('{:},'.format(y1))
         sum_file.write('{:}\n'.format(lab))
         sum_file.close()
+    '''
         
     if(drawMap == True):
         with open(os.path.splitext(file)[0] + '_map.csv', "a") as coord_file:
@@ -545,7 +581,7 @@ def addBlankLine(file):
 def ix(arrval, value):
     #return index of array *at or below* value
     if value < min(arrval): return 0
-    return max(where(arrval<=value)[0])
+    return (where(arrval<=value)[0]).max()
 
 ####################################################################
 ''' Convert null or strings into floats '''
