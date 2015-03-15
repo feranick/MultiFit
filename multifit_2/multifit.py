@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20150315a'
+    version = '2-20150315b'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -136,12 +136,10 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
                 '''
 
     ### Write Summary
-
-    initParHeader = ['File','D5G','(D4+D5)/G','HC','iD1','iD4','iD5','iG','wG','D1/G','D5%Gaussian', \
-                      'D1%Gaussian','G%Gaussianfit','Fit-type','Chi-square','red-chi-sq','Fit-OK','x1','y1','label']
     initPar = [file, \
             out.best_values['p1_amplitude']/out.best_values['p5_amplitude'], \
-            (out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude'], 0, \
+            (out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude'], \
+            0, \
             out.best_values['p2_amplitude'], \
             out.best_values['p0_amplitude'], \
             out.best_values['p1_amplitude'], \
@@ -149,58 +147,20 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
             out.best_values['p5_sigma']*2, \
             out.best_values['p2_amplitude']/out.best_values['p5_amplitude'] ]
     if type ==0:
-        initPar.extend([out.best_values['p1_fraction']])
-        initPar.extend([out.best_values['p2_fraction']])
-        initPar.extend([out.best_values['p5_fraction']])
+        initPar.extend([out.best_values['p1_fraction'], \
+                        out.best_values['p2_fraction'], \
+                        out.best_values['p2_fraction']])
     else:
         for i in range(0,3):
             initPar.extend([type-1])
-    initPar.extend([p.typec])
-    initPar.extend([out.chisqr])
-    initPar.extend([out.redchi])
-    initPar.extend([out.success])
-    initPar.extend([x1])
-    initPar.extend([y1])
-    initPar.extend([lab])
+    initPar.extend([p.typec, out.chisqr, out.redchi, out.success, \
+                    x1, y1, lab])
 
     with open(defPar.summary, "a") as sum_file:
         csv_out=csv.writer(sum_file)
-        if header == True:
-            csv_out.writerow(initParHeader)
         csv_out.writerow(initPar)
         sum_file.close()
-
-    '''
-    with open(defPar.summary, "a") as sum_file:
-        if header == True:
-            sum_file.write('File,D5G,(D4+D5)/G,HC,iD1,iD4,iD5,iG,wG,D1/G,D5%Gaussian,D1%Gaussian,G%Gaussianfit,Chi-square,red-chi-sq,Fit-OK,x1,y1,label\n')
-        sum_file.write('{:},'.format(file))
-        sum_file.write('{:f},'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
-        sum_file.write('{:f},'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']))
-        sum_file.write('{:f},'.format(0))
-        sum_file.write('{:f},'.format(out.best_values['p2_amplitude']))
-        sum_file.write('{:f},'.format(out.best_values['p0_amplitude']))
-        sum_file.write('{:f},'.format(out.best_values['p1_amplitude']))
-        sum_file.write('{:f},'.format(out.best_values['p5_amplitude']))
-        sum_file.write('{:f},'.format(out.best_values['p5_sigma']*2))
-        sum_file.write('{:f},'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude']))
-        if type ==0:
-            sum_file.write('{:f},'.format(out.best_values['p1_fraction']))
-            sum_file.write('{:f},'.format(out.best_values['p2_fraction']))
-            sum_file.write('{:f},'.format(out.best_values['p5_fraction']))
-        else:
-            for i in range(0,3):
-                sum_file.write('{:},'.format(type-1))
-            sum_file.write('{:},'.format(p.typec))
-        sum_file.write('{:},'.format(out.chisqr))
-        sum_file.write('{:},'.format(out.redchi))
-        sum_file.write('{:},'.format(out.success))
-        sum_file.write('{:},'.format(x1))
-        sum_file.write('{:},'.format(y1))
-        sum_file.write('{:}\n'.format(lab))
-        sum_file.close()
-    '''
-        
+    
     if(drawMap == True):
         with open(os.path.splitext(file)[0] + '_map.csv', "a") as coord_file:
             coord_file.write('{:},'.format(x1))
@@ -329,9 +289,13 @@ def main():
         usage()
         sys.exit(2)
 
+    # If parameter file not present, make one
     if not exists(defPar.inputParFile):
         print '\n Init parameter not found. Generating a new one...'
         genInitPar()
+
+    # If summary file is not present, make it and fill header
+    makeHeaderSummary()
 
     if(defPar.multiproc == True):
         print('\n Multiprocessing enabled: ' + str(mp.cpu_count()) + ' CPUs\n')
@@ -544,6 +508,23 @@ def genInitPar():
 
 
 ####################################################################
+''' Make header, if absent, for the summary file '''
+####################################################################
+
+def makeHeaderSummary():
+    if os.path.isfile(defPar.summary) == False:
+        initParHeader = ['File','D5G','(D4+D5)/G','HC','iD1','iD4',\
+                         'iD5','iG','wG','D1/G','D5%Gaussian', \
+                         'D1%Gaussian','G%Gaussianfit','Fit-type', \
+                         'Chi-square','red-chi-sq','Fit-OK','x1','y1', \
+                         'label']
+        with open(defPar.summary, "a") as sum_file:
+            csv_out=csv.writer(sum_file)
+            csv_out.writerow(initParHeader)
+            sum_file.close()
+
+
+####################################################################
 ''' Lists the program usage '''
 ####################################################################
 
@@ -574,6 +555,7 @@ def addBlankLine(file):
     except:
         print "File busy!"
 
+
 ####################################################################
 ''' Finds data index for a given x value '''
 ####################################################################
@@ -582,6 +564,7 @@ def ix(arrval, value):
     #return index of array *at or below* value
     if value < min(arrval): return 0
     return (where(arrval<=value)[0]).max()
+
 
 ####################################################################
 ''' Convert null or strings into floats '''
@@ -592,6 +575,7 @@ def nulStrConvDigit(x):
         return None
     else:
         return float(x)
+
 
 ####################################################################
 ''' Main initialization routine '''
