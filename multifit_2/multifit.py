@@ -10,25 +10,23 @@
 #import matplotlib
 #matplotlib.use('Agg')
 ### ---------------------------------------
-import openpyxl as px
 from numpy import *
 from lmfit.models import GaussianModel, LorentzianModel, PseudoVoigtModel, VoigtModel
 import matplotlib.pyplot as plt
-import sys, os.path, getopt, glob
+import sys, os.path, getopt, glob, csv
 from os.path import exists
 from multiprocessing import Pool
 import multiprocessing as mp
-
 
 ####################################################################
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20150313c'
+    version = '2-20150315a'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
-    inputParFile = 'input_parameters.xlsx'
+    inputParFile = 'input_parameters.csv'
     # Save summary fitting results
     summary = 'summary.csv'
     # max reduced chi square for reliable results
@@ -44,17 +42,21 @@ class defPar:
 
 def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
     
-    ### Load initialization parameters from xlsx file.
-    W = px.load_workbook(defPar.inputParFile, use_iterators = True)
-    sheet = W.active
-    inval=[]
-    defPar.NumPeaks = sheet.get_highest_column() - 1
-    
+    ### Load initialization parameters from csv file.
+    with open(defPar.inputParFile, 'rb') as inputFile:
+        input = csv.reader(inputFile)
+        numRows = 0
+        inval=[]
+        for row in input:
+            defPar.NumPeaks = len(row)-1
+            row = [nulStrConvDigit(entry) for entry in row]
+            inval.append(row)
+            numRows +=1
+        inputFile.close()
+    inv = resize(inval, [numRows, defPar.NumPeaks+1])
     fpeak = []
-    for row in sheet.iter_rows():
-        for k in row:
-            inval.append(k.internal_value)
-    inv = resize(inval, [14, defPar.NumPeaks+1])
+
+    # define active peaks
     for i in range(1, defPar.NumPeaks+1):
         fpeak.extend([int(inv[1,i])])
 
@@ -134,6 +136,41 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
                 '''
 
     ### Write Summary
+
+    initParHeader = ['File','D5G','(D4+D5)/G','HC','iD1','iD4','iD5','iG','wG','D1/G','D5%Gaussian', \
+                      'D1%Gaussian','G%Gaussianfit','Fit-type','Chi-square','red-chi-sq','Fit-OK','x1','y1','label']
+    initPar = [file, \
+            out.best_values['p1_amplitude']/out.best_values['p5_amplitude'], \
+            (out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude'], 0, \
+            out.best_values['p2_amplitude'], \
+            out.best_values['p0_amplitude'], \
+            out.best_values['p1_amplitude'], \
+            out.best_values['p5_amplitude'], \
+            out.best_values['p5_sigma']*2, \
+            out.best_values['p2_amplitude']/out.best_values['p5_amplitude'] ]
+    if type ==0:
+        initPar.extend([out.best_values['p1_fraction']])
+        initPar.extend([out.best_values['p2_fraction']])
+        initPar.extend([out.best_values['p5_fraction']])
+    else:
+        for i in range(0,3):
+            initPar.extend([type-1])
+    initPar.extend([p.typec])
+    initPar.extend([out.chisqr])
+    initPar.extend([out.redchi])
+    initPar.extend([out.success])
+    initPar.extend([x1])
+    initPar.extend([y1])
+    initPar.extend([lab])
+
+    with open(defPar.summary, "a") as sum_file:
+        csv_out=csv.writer(sum_file)
+        if header == True:
+            csv_out.writerow(initParHeader)
+        csv_out.writerow(initPar)
+        sum_file.close()
+
+    '''
     with open(defPar.summary, "a") as sum_file:
         if header == True:
             sum_file.write('File,D5G,(D4+D5)/G,HC,iD1,iD4,iD5,iG,wG,D1/G,D5%Gaussian,D1%Gaussian,G%Gaussianfit,Chi-square,red-chi-sq,Fit-OK,x1,y1,label\n')
@@ -162,6 +199,7 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
         sum_file.write('{:},'.format(y1))
         sum_file.write('{:}\n'.format(lab))
         sum_file.close()
+    '''
         
     if(drawMap == True):
         with open(os.path.splitext(file)[0] + '_map.csv', "a") as coord_file:
@@ -481,28 +519,27 @@ def genInitPar():
         print(' Input parameter file: ' + defPar.inputParFile + ' already exists\n')
         sys.exit(2)
     else:
-        WW=px.Workbook()
-        pp=WW.active
-        pp.title='InputParameters'
-    
-        initPar = [['name', 'D4', 'D5', 'D1', 'D3a', 'D3b', 'G', 'D2'], \
-               ['activate peak',1,1,1,0,1,1,0], \
-               ['center',1160,1250,1330,1400,1470,1590,1680], \
-               ['center min','',1240,'','','','',''], \
-               ['center max','',1275,'','','','',''], \
-               ['sigma',20,20,40,20,10,20,20], \
-               ['sigma min',10,10,10,10,5,10,10], \
-               ['sigma max',50,50,50,50,50,50,50], \
-               ['amplitude','','','','','','',''], \
-               ['ampl. min',0,0,0,0,0,0,0], \
-               ['ampl. max','','','','','','',''], \
-               ['fraction',0.5,0.5,0.5,0.5,0.5,0.5,0.5], \
-               ['fraction min',0,0,0,0,0,0,0], \
-               ['fraction max',1,1,1,1,1,1,1]]
-        for row in range(0, 14):
-            pp.append(initPar[row])
-    
-        WW.save(defPar.inputParFile)
+        initPar = [('name', 'D4', 'D5', 'D1', 'D3a', 'D3b', 'G', 'D2'), \
+            ('activate peak',1,1,1,0,1,1,0), \
+            ('center',1160,1250,1330,1400,1470,1590,1680), \
+            ('center min','',1240,'','','','',''), \
+            ('center max','',1275,'','','','',''), \
+            ('sigma',20,20,40,20,10,20,20), \
+            ('sigma min',10,10,10,10,5,10,10), \
+            ('sigma max',50,50,50,50,50,50,50), \
+            ('amplitude','','','','','','',''), \
+            ('ampl. min',0,0,0,0,0,0,0), \
+            ('ampl. max','','','','','','',''), \
+            ('fraction',0.5,0.5,0.5,0.5,0.5,0.5,0.5), \
+            ('fraction min',0,0,0,0,0,0,0), \
+            ('fraction max',1,1,1,1,1,1,1)]
+            
+        with open(defPar.inputParFile, "a") as inputFile:
+            csv_out=csv.writer(inputFile)
+            for row in initPar:
+                csv_out.writerow(row)
+            inputFile.close()
+
         print(' Input paramters saved in: ' + defPar.inputParFile)
 
 
@@ -544,8 +581,17 @@ def addBlankLine(file):
 def ix(arrval, value):
     #return index of array *at or below* value
     if value < min(arrval): return 0
-    return max(where(arrval<=value)[0])
+    return (where(arrval<=value)[0]).max()
 
+####################################################################
+''' Convert null or strings into floats '''
+####################################################################
+                      
+def nulStrConvDigit(x):
+    if (not x or not x.isdigit()):
+        return None
+    else:
+        return float(x)
 
 ####################################################################
 ''' Main initialization routine '''

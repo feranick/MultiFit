@@ -20,7 +20,7 @@ Usage
 5. Create and save plot batch data (no fitting):
 ./multifit.py -p
 
-6. Create new input paramter file (xlsx)
+6. Create new input paramter file (csv)
 ./multifit.py -i
 
 where n:
@@ -31,7 +31,7 @@ where n:
 3. Voigt
 
 Fitting parameters are initialized within the
-"input_parameters.xlsx" Excel file.
+"input_parameters.csv" Excel file.
 
 
 3. For Headless workstations:
@@ -45,9 +45,8 @@ Installation
 The following dependencies are required:
 
     lmfit
-    scipy
+    scipy (>0.11)
     matplotlib
-    openpyxl (> 2.1.4)
 
 These can be installed through the system repository (apt, macports, etc) or by 
 python's:
@@ -59,7 +58,7 @@ python's:
 
 Install dependencies:
 
-    sudo apt-get install python-matplotlib python-scipy python-openpyxl
+    sudo apt-get install python-matplotlib python-scipy
     sudo easy_install lmfit
 
 2. OS X:
@@ -73,7 +72,7 @@ Update ports:
 
 Install the following ports:
 
-    sudo port install py-lmfit py-scipy py-matplotlib py-openpyxl
+    sudo port install py-lmfit py-scipy py-matplotlib
 
 3. MS Windows:
 ---------------
