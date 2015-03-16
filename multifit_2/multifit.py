@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20150315b'
+    version = '2-20150316a'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -165,7 +165,7 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
         with open(os.path.splitext(file)[0] + '_map.csv', "a") as coord_file:
             coord_file.write('{:},'.format(x1))
             coord_file.write('{:},'.format(y1))
-            if (out.success == True or out.redchi < defPar.redchi):
+            if (out.success == True and out.redchi < defPar.redchi):
                 coord_file.write('{:}\n'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
             else:
                 coord_file.write('0\n')
