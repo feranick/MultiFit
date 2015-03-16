@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20150316a'
+    version = '2-20150316b'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -30,7 +30,7 @@ class defPar:
     # Save summary fitting results
     summary = 'summary.csv'
     # max reduced chi square for reliable results
-    redchi = 1.5
+    redchi = 2
     ### Plot initial fitting curve
     initCurve = True
     ### Multiprocessing?
@@ -418,8 +418,8 @@ class readMap:
                 
                 self.x = data[0, 2:]
                 for i in range(0, self.num_lines):
-                    self.x1[i] = data[i+1, 0]
-                    self.y1[i] = data[i+1, 1]
+                    self.x1[i] = data[i+1, 1]
+                    self.y1[i] = data[i+1, 0]
                     self.y[i] = data[i+1, 2:]
         except:
             print(' File: ' + file + ' not found\n')

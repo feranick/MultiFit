@@ -24,7 +24,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '1-20150313a'
+    version = '1-20150316a'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Save results as ASCII?
@@ -445,8 +445,8 @@ class readMap:
     
                 self.x = data[0, 2:]
                 for i in range(0, self.num_lines):
-                    self.x1[i] = data[i+1, 0]
-                    self.y1[i] = data[i+1, 1]
+                    self.x1[i] = data[i+1, 1]
+                    self.y1[i] = data[i+1, 0]
                     self.y[i] = data[i+1, 2:]
                     self.ymax[i] = max(self.y[i])
         except:
