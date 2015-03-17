@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20150316b'
+    version = '2-20150316d'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -31,6 +31,8 @@ class defPar:
     summary = 'summary.csv'
     # max reduced chi square for reliable results
     redchi = 2
+    # value assigned to D5G wheen fit is wrong
+    outliar = 5
     ### Plot initial fitting curve
     initCurve = True
     ### Multiprocessing?
@@ -168,7 +170,7 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
             if (out.success == True and out.redchi < defPar.redchi):
                 coord_file.write('{:}\n'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
             else:
-                coord_file.write('0\n')
+                coord_file.write('{:}\n'.format(defPar.outliar))
             coord_file.close()
     else:
         ### Plot optimal fit and individial components
