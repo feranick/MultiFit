@@ -30,9 +30,9 @@ class defPar:
     # Save summary fitting results
     summary = 'summary.csv'
     # max reduced chi square for reliable results
-    redchi = 2
+    redchi = 10
     # value assigned to D5G wheen fit is wrong
-    outliar = 5
+    outliar = 0
     ### Plot initial fitting curve
     initCurve = True
     ### Multiprocessing?
