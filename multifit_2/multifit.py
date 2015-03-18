@@ -7,8 +7,8 @@
 ###=============================================================
 
 ### Uncomment this if for headless servers.
-import matplotlib
-matplotlib.use('Agg')
+#import matplotlib
+#matplotlib.use('Agg')
 ### ---------------------------------------
 from numpy import *
 from lmfit.models import GaussianModel, LorentzianModel, PseudoVoigtModel, VoigtModel
