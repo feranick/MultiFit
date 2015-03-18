@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20150318a'
+    version = '2-20150318b'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -142,7 +142,7 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
             '''
 
     ### Write Summary
-    initPar = [file, \
+    summaryFile = [file, \
             d5g, d4d5g, 0, \
             out.best_values['p2_amplitude'], \
             out.best_values['p0_amplitude'], \
@@ -151,18 +151,18 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
             out.best_values['p5_sigma']*2, \
             d1g ]
     if type ==0:
-        initPar.extend([out.best_values['p1_fraction'], \
+        summaryFile.extend([out.best_values['p1_fraction'], \
                         out.best_values['p2_fraction'], \
                         out.best_values['p2_fraction']])
     else:
         for i in range(0,3):
-            initPar.extend([type-1])
-    initPar.extend([p.typec, out.chisqr, out.redchi, out.success, \
+            summaryFile.extend([type-1])
+    summaryFile.extend([p.typec, out.chisqr, out.redchi, out.success, \
                     x1, y1, lab])
 
     with open(defPar.summary, "a") as sum_file:
         csv_out=csv.writer(sum_file)
-        csv_out.writerow(initPar)
+        csv_out.writerow(summaryFile)
         sum_file.close()
     
     if(processMap == True):
@@ -453,14 +453,14 @@ def genInitPar():
 
 def makeHeaderSummary():
     if os.path.isfile(defPar.summary) == False:
-        initParHeader = ['File','D5G','(D4+D5)/G','HC','iD1','iD4',\
+        summaryHeader = ['File','D5G','(D4+D5)/G','HC','iD1','iD4',\
                          'iD5','iG','wG','D1/G','D5%Gaussian', \
                          'D1%Gaussian','G%Gaussianfit','Fit-type', \
                          'Chi-square','red-chi-sq','Fit-OK','x1','y1', \
                          'label']
         with open(defPar.summary, "a") as sum_file:
             csv_out=csv.writer(sum_file)
-            csv_out.writerow(initParHeader)
+            csv_out.writerow(summaryHeader)
             sum_file.close()
 
 
