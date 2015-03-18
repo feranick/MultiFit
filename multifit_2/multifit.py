@@ -7,8 +7,8 @@
 ###=============================================================
 
 ### Uncomment this if for headless servers.
-#import matplotlib
-#matplotlib.use('Agg')
+import matplotlib
+matplotlib.use('Agg')
 ### ---------------------------------------
 from numpy import *
 from lmfit.models import GaussianModel, LorentzianModel, PseudoVoigtModel, VoigtModel
@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20150316d'
+    version = '2-20150318a'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -42,7 +42,7 @@ class defPar:
 ''' Main routine to perform and plot the fit '''
 ####################################################################
 
-def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
+def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
     
     ### Load initialization parameters from csv file.
     with open(defPar.inputParFile, 'rb') as inputFile:
@@ -113,11 +113,15 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
         header = False
         print('\nFit successful: ' + str(out.success))
 
-    if (drawMap == False):
+        d5g = out.best_values['p1_amplitude']/out.best_values['p5_amplitude']
+        d4d5g = (out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']
+        d1g = out.best_values['p2_amplitude']/out.best_values['p5_amplitude']
+
+    if (processMap == False):
         if (fpeak[1] == 1 & fpeak[2] == 1 & fpeak[5] == 1):
-            print('D5/G = {:f}'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
-            print('(D4+D5)/G = {:f}'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']))
-            print('D1/G = {:f}'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude']))
+            print('D5/G = {:f}'.format(d5g))
+            print('(D4+D5)/G = {:f}'.format(d4d5g))
+            print('D1/G = {:f}'.format(d1g))
             if type ==0:
                 print('G: {:f}% Gaussian'.format(out.best_values['p5_fraction']*100))
             print('Fit type: {:}'.format(p.typec))
@@ -127,27 +131,25 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
             ### Uncomment to enable saving results of each fit in a separate file.
             '''
                 with open(outfile, "a") as text_file:
-                text_file.write('\nD5/G = {:f}'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
-                text_file.write('\n(D4+D5)/G = {:f}'.format((out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']))
-                text_file.write('\nD1/G = {:f}'.format(out.best_values['p2_amplitude']/out.best_values['p5_amplitude']))
+                text_file.write('\nD5/G = {:f}'.format(d5g))
+                text_file.write('\n(D4+D5)/G = {:f}'.format(d4d5g))
+                text_file.write('\nD1/G = {:f}'.format(d1g))
                 if type ==0:
                     text_file.write('\nG %Gaussian: {:f}'.format(out.best_values['p5_fraction']))
-                    text_file.write('\nFit type: {:}'.format(p.typec))
-                    text_file.write('\nChi-square: {:}'.format(out.chisqr))
-                    text_file.write('\nReduced Chi-square: {:}\n'.format(out.redchi))
-                '''
+                text_file.write('\nFit type: {:}'.format(p.typec))
+                text_file.write('\nChi-square: {:}'.format(out.chisqr))
+                text_file.write('\nReduced Chi-square: {:}\n'.format(out.redchi))
+            '''
 
     ### Write Summary
     initPar = [file, \
-            out.best_values['p1_amplitude']/out.best_values['p5_amplitude'], \
-            (out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude'], \
-            0, \
+            d5g, d4d5g, 0, \
             out.best_values['p2_amplitude'], \
             out.best_values['p0_amplitude'], \
             out.best_values['p1_amplitude'], \
             out.best_values['p5_amplitude'], \
             out.best_values['p5_sigma']*2, \
-            out.best_values['p2_amplitude']/out.best_values['p5_amplitude'] ]
+            d1g ]
     if type ==0:
         initPar.extend([out.best_values['p1_fraction'], \
                         out.best_values['p2_fraction'], \
@@ -163,12 +165,12 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
         csv_out.writerow(initPar)
         sum_file.close()
     
-    if(drawMap == True):
+    if(processMap == True):
         with open(os.path.splitext(file)[0] + '_map.csv', "a") as coord_file:
             coord_file.write('{:},'.format(x1))
             coord_file.write('{:},'.format(y1))
             if (out.success == True and out.redchi < defPar.redchi):
-                coord_file.write('{:}\n'.format(out.best_values['p1_amplitude']/out.best_values['p5_amplitude']))
+                coord_file.write('{:}\n'.format(d5g))
             else:
                 coord_file.write('{:}\n'.format(defPar.outliar))
             coord_file.close()
@@ -194,8 +196,7 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
 
         ax.text(0.05, 0.875, 'Fit type: {:}\nD5/G = {:f}\nRed. Chi sq: {:}'.format( \
                                 p.typec, \
-                                out.best_values['p1_amplitude']/out.best_values['p5_amplitude'], \
-                                out.redchi), transform=ax.transAxes)
+                                d5g, out.redchi), transform=ax.transAxes)
 
         plt.xlabel('Raman shift [1/cm]')
         plt.ylabel('Intensity [arb. units]')
@@ -210,69 +211,6 @@ def calculate(x, y, x1, y1, file, type, drawMap, showPlot, lab):
 
 	del p
 	del out
-
-
-####################################################################
-''' Drawing only routine '''
-####################################################################
-
-def plotData(x, y, file, showPlot):
-    ### Plot initial data
-    pngData = os.path.splitext(file)[0] + '.png'   # Save plot as image
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.plot(x, y, label='data')
-    plt.xlabel('Raman shift [1/cm]')
-    plt.ylabel('Intensity [arb. units]')
-    plt.title(file)
-    #plt.legend()
-    plt.grid(True)
-    plt.savefig(pngData)  # Save plot
-    if(showPlot == True):
-        print('*** Close plot to quit ***\n')
-        plt.show()
-    plt.close()
-
-
-####################################################################
-''' Definition of class map'''
-####################################################################
-
-class Map:
-    def __init__(self):
-        self.x = []
-        self.y = []
-        self.z = []
-    
-    def readCoord(self, file):
-        self.num_lines = sum(1 for line in open(file))
-        
-        data = genfromtxt(file)
-        self.x = data[:,0]
-        self.y = data[:,1]
-        self.z = data[:,2]
-
-    def draw(self, file, showplot):
-        self.readCoord(file)
-        #fig = plt.figure()
-        #ax = fig.add_subplot(111, projection='3d')
-        
-        #p = ax.pcolor(self.x, self.y, self.z, cmap='Spectral', vmin=min(self.z), vmax=max(self.z))
-        #fig.colorbar(p, ax=ax)
-        #surf = ax.plot_trisurf(self.x, self.y, self.z, cmap=cm.jet, linewidth=0)
-        #fig.colorbar(surf)
-
-        #ax.xaxis.set_major_locator(MaxNLocator(5))
-        #ax.yaxis.set_major_locator(MaxNLocator(6))
-        #ax.zaxis.set_major_locator(MaxNLocator(5))
-        #fig.tight_layout()
-        
-        #plt.xlabel('[um]')
-        #plt.ylabel('[um]')
-        #fig.savefig('map.png')  # Save plot
-        #if(showplot == True):
-        #    print('*** Close plot to quit ***\n')
-        #    plt.show()
 
 
 ####################################################################
@@ -577,6 +515,70 @@ def nulStrConvDigit(x):
         return None
     else:
         return float(x)
+
+
+####################################################################
+''' Drawing only routine '''
+####################################################################
+
+def plotData(x, y, file, showPlot):
+    ### Plot initial data
+    pngData = os.path.splitext(file)[0] + '.png'   # Save plot as image
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(x, y, label='data')
+    plt.xlabel('Raman shift [1/cm]')
+    plt.ylabel('Intensity [arb. units]')
+    plt.title(file)
+    #plt.legend()
+    plt.grid(True)
+    plt.savefig(pngData)  # Save plot
+    if(showPlot == True):
+        print('*** Close plot to quit ***\n')
+        plt.show()
+    plt.close()
+
+
+####################################################################
+''' Definition of class map'''
+####################################################################
+
+class Map:
+    def __init__(self):
+        self.x = []
+        self.y = []
+        self.z = []
+    
+    def readCoord(self, file):
+        self.num_lines = sum(1 for line in open(file))
+        
+        data = genfromtxt(file)
+        self.x = data[:,0]
+        self.y = data[:,1]
+        self.z = data[:,2]
+    
+    def draw(self, file, showplot):
+        self.readCoord(file)
+#fig = plt.figure()
+#ax = fig.add_subplot(111, projection='3d')
+
+#p = ax.pcolor(self.x, self.y, self.z, cmap='Spectral', vmin=min(self.z), vmax=max(self.z))
+#fig.colorbar(p, ax=ax)
+#surf = ax.plot_trisurf(self.x, self.y, self.z, cmap=cm.jet, linewidth=0)
+#fig.colorbar(surf)
+
+#ax.xaxis.set_major_locator(MaxNLocator(5))
+#ax.yaxis.set_major_locator(MaxNLocator(6))
+#ax.zaxis.set_major_locator(MaxNLocator(5))
+#fig.tight_layout()
+
+#plt.xlabel('[um]')
+#plt.ylabel('[um]')
+#fig.savefig('map.png')  # Save plot
+#if(showplot == True):
+#    print('*** Close plot to quit ***\n')
+#    plt.show()
+
 
 
 ####################################################################
