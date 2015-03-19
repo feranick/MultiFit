@@ -39,6 +39,12 @@ uncomment the two lines in multifit.py:
     import matplotlib
     matplotlib.use('Agg')
 
+4. unattended runtime (runs in the background in a headless workstation)
+
+    nohop multifit.py > -m filename n > log.txt
+
+Log.txt will contain the output generated during the fit and usually displayed in the terminal.
+
 Installation
 =============
 
