@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20150318b'
+    version = '2-20150319a'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -45,7 +45,7 @@ class defPar:
 def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
     
     ### Load initialization parameters from csv file.
-    with open(defPar.inputParFile, 'rb') as inputFile:
+    with open(defPar.inputParFile, 'rU') as inputFile:
         input = csv.reader(inputFile)
         numRows = 0
         inval=[]
