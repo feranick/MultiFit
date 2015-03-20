@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20150319a'
+    version = '2-20150319b'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -37,6 +37,11 @@ class defPar:
     initCurve = True
     ### Multiprocessing?
     multiproc = True
+    ### Max number of processor. Uncomment:
+    ###     first: max allowed by hardware
+    ###     second: max specified.
+    numProc = mp.cpu_count()
+    #numProc = 4
 
 ####################################################################
 ''' Main routine to perform and plot the fit '''
@@ -238,7 +243,7 @@ def main():
     makeHeaderSummary()
 
     if(defPar.multiproc == True):
-        print('\n Multiprocessing enabled: ' + str(mp.cpu_count()) + ' CPUs\n')
+        print('\n Multiprocessing enabled: ' + str(defPar.numProc) + '/' + str(mp.cpu_count()) + ' CPUs\n')
     else:
         print('\n Multiprocessing disabled\n')
     for o, a in opts:
@@ -251,7 +256,7 @@ def main():
             type = int(sys.argv[2])
             i = 0
             if(defPar.multiproc == True):
-                p = Pool(mp.cpu_count())
+                p = Pool(defPar.numProc)
                 for f in glob.glob('*.txt'):
                     if (f != 'summary.txt'):
                         rs = readSingleSpectra(f)
@@ -282,7 +287,7 @@ def main():
         elif o in ("-p", "--plot"):
             if(len(sys.argv) < 3):
                 if(defPar.multiproc == True):
-                    p = Pool(mp.cpu_count())
+                    p = Pool(defPar.numProc)
                     for f in glob.glob('*.txt'):
                         if (f != 'summary.txt'):
                             rs = readSingleSpectra(f)
@@ -313,7 +318,7 @@ def main():
             rm = readMap(file)
             map = Map()
             if(defPar.multiproc == True):
-                p = Pool(mp.cpu_count())
+                p = Pool(defPar.numProc)
                 for i in range (1, rm.num_lines):
                     p.apply_async(calculate, args=(rm.x, rm.y[i], rm.x1[i], rm.y1[i], file, type, True, False, ''))
                 p.close()
