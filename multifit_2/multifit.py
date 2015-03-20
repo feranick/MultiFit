@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20150319b'
+    version = '2-20150319c'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -67,7 +67,7 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
     for i in range(1, defPar.NumPeaks+1):
         fpeak.extend([int(inv[1,i])])
 
-	p = Peak(type)
+    p = Peak(type)
     print (' Fitting with ' + str(defPar.NumPeaks) + ' (' + p.typec + ') peaks')
     
     ### Initialize parameters for fit.
@@ -214,8 +214,8 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
             plt.show()
         plt.close()
 
-	del p
-	del out
+        del p
+        del out
 
 
 ####################################################################
@@ -236,7 +236,7 @@ def main():
 
     # If parameter file not present, make one
     if not exists(defPar.inputParFile):
-        print '\n Init parameter not found. Generating a new one...'
+        print ('\n Init parameter not found. Generating a new one...')
         genInitPar()
 
     # If summary file is not present, make it and fill header
@@ -498,7 +498,7 @@ def addBlankLine(file):
         with open(file, "a") as sum_file:
             sum_file.write('\n')
     except:
-        print "File busy!"
+        print ('File busy!')
 
 
 ####################################################################
