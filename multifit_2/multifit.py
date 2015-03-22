@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20150319c'
+    version = '2-20150322a'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -121,6 +121,7 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
         d5g = out.best_values['p1_amplitude']/out.best_values['p5_amplitude']
         d4d5g = (out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']
         d1g = out.best_values['p2_amplitude']/out.best_values['p5_amplitude']
+        d1d1g = out.best_values['p2_amplitude']/(out.best_values['p2_amplitude']+out.best_values['p5_amplitude'])
 
     if (processMap == False):
         if (fpeak[1] == 1 & fpeak[2] == 1 & fpeak[5] == 1):
@@ -148,13 +149,13 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
 
     ### Write Summary
     summaryFile = [file, \
-            d5g, d4d5g, 0, \
+            d5g, d4d5g, 0, d1g, d1d1g, \
             out.best_values['p2_amplitude'], \
             out.best_values['p0_amplitude'], \
             out.best_values['p1_amplitude'], \
             out.best_values['p5_amplitude'], \
             out.best_values['p5_sigma']*2, \
-            d1g ]
+            out.best_values['p5_center']]
     if type ==0:
         summaryFile.extend([out.best_values['p1_fraction'], \
                         out.best_values['p2_fraction'], \
@@ -162,7 +163,7 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
     else:
         for i in range(0,3):
             summaryFile.extend([type-1])
-    summaryFile.extend([p.typec, out.chisqr, out.redchi, out.success, \
+    summaryFile.extend([out.chisqr, out.redchi, p.typec, out.success, \
                     x1, y1, lab])
 
     with open(defPar.summary, "a") as sum_file:
@@ -458,10 +459,10 @@ def genInitPar():
 
 def makeHeaderSummary():
     if os.path.isfile(defPar.summary) == False:
-        summaryHeader = ['File','D5G','(D4+D5)/G','HC','iD1','iD4',\
-                         'iD5','iG','wG','D1/G','D5%Gaussian', \
-                         'D1%Gaussian','G%Gaussianfit','Fit-type', \
-                         'Chi-square','red-chi-sq','Fit-OK','x1','y1', \
+        summaryHeader = ['File','D5G','(D4+D5)/G','HC','D1/G', 'D1/(D1+G)',
+                         'iD1','iD4','iD5','iG','wG','pG','D5%Gaussian', \
+                         'D1%Gaussian','G%Gaussianfit','Chi-square',\
+                         'red-chi-sq','Fit-type','Fit-OK','x1','y1', \
                          'label']
         with open(defPar.summary, "a") as sum_file:
             csv_out=csv.writer(sum_file)
