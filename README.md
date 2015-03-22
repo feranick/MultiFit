@@ -48,26 +48,47 @@ Log.txt will contain the output generated during the fit and usually displayed i
 Installation
 =============
 
+Multifit.py is compatible with both Python 2.6-2.7 and Python 3.x. Since the requied dependencies support both Python 2.x and 3.x, you should be able to use either.
+
 The following dependencies are required:
 
     lmfit
     scipy (>0.11)
-    matplotlib
+    numpy
 
-These can be installed through the system repository (apt, macports, etc) or by 
-python's:
+These can be installed through the system repository (apt, macports, etc) or by python's:
 
     sudo easy_install lmfit 
+or 
+    sudo pip install lmfit
 
-1. Ubuntu/Debian:
+
+1. Ubuntu:
 -----------------
 
+Multifit runs on any recent version of Ubuntu. This has been tested with versions as early as Trusty (14.04).
 Install dependencies:
 
     sudo apt-get install python-matplotlib python-scipy
     sudo easy_install lmfit
 
-2. OS X:
+
+2. Debian 7 (Wheezy) and Raspbian (for Raspberry PI)
+-----------------------------------------------------
+
+Multifit runs with a little work on Debian 7 and Raspbian. Start by installing python-pip and other required programs:
+
+    sudo apt-get install python-pip gfortran python-dev liblapack*
+
+Then you can use pip to install the updated dependencies:
+
+    sudo pip install numpy --update
+    sudo pip install scipy --update
+    sudo pip install lmfit --update
+
+This might take a while. 
+
+3. OS X:
 ---------
 
 Install Macports from http://macports.org
@@ -80,10 +101,10 @@ Install the following ports:
 
     sudo port install py-lmfit py-scipy py-matplotlib
 
-3. MS Windows:
+4. MS Windows:
 ---------------
 
-Multifit should work on Windows with the proper dependencies installed.
+Multifit should work on Windows with the proper dependencies installed see above).
 Support is not available.
 
 ========================================================================
