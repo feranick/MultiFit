@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20150322a'
+    version = '2-20150423a'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -42,6 +42,9 @@ class defPar:
     ###     second: max specified.
     numProc = mp.cpu_count()
     #numProc = 4
+    ### Parameters for H:C conversion
+    mHC = 0.8692
+    bHC = -0.0545
 
 ####################################################################
 ''' Main routine to perform and plot the fit '''
@@ -122,10 +125,12 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
         d4d5g = (out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']
         d1g = out.best_values['p2_amplitude']/out.best_values['p5_amplitude']
         d1d1g = out.best_values['p2_amplitude']/(out.best_values['p2_amplitude']+out.best_values['p5_amplitude'])
+        hc = defPar.mHC*d5g + defPar.bHC
 
     if (processMap == False):
         if (fpeak[1] == 1 & fpeak[2] == 1 & fpeak[5] == 1):
             print('D5/G = {:f}'.format(d5g))
+            print('H:C = {:f}'.format(hc))
             print('(D4+D5)/G = {:f}'.format(d4d5g))
             print('D1/G = {:f}'.format(d1g))
             if type ==0:
@@ -138,6 +143,7 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
             '''
                 with open(outfile, "a") as text_file:
                 text_file.write('\nD5/G = {:f}'.format(d5g))
+                text_file.write('\H:C = {:f}'.format(hc))
                 text_file.write('\n(D4+D5)/G = {:f}'.format(d4d5g))
                 text_file.write('\nD1/G = {:f}'.format(d1g))
                 if type ==0:
@@ -149,7 +155,7 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
 
     ### Write Summary
     summaryFile = [file, \
-            d5g, d4d5g, 0, d1g, d1d1g, \
+            d5g, d4d5g, hc, d1g, d1d1g, \
             out.best_values['p2_amplitude'], \
             out.best_values['p0_amplitude'], \
             out.best_values['p1_amplitude'], \
@@ -200,7 +206,7 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
                 else:
                     ax.plot(x,y[i],'g')
 
-        ax.text(0.05, 0.875, 'Fit type: {:}\nD5/G = {:f}\nRed. Chi sq: {:}'.format( \
+        ax.text(0.05, 0.875, 'Fit type: {:}\nH:C = {:f}\nRed. Chi sq: {:}'.format( \
                                 p.typec, \
                                 d5g, out.redchi), transform=ax.transAxes)
 
