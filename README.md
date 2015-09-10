@@ -109,18 +109,27 @@ Support is not available.
 
 ========================================================================
 
-Fitting Raman maps (mapfit)
+Fitting Raman maps
 ========================================================================
 
-The current version can open Raman maps (Horiba LabSpec5, saved as text files)
-and fits each spectra in the map. While it does not yet produce a visual 
+MultiFit.py can open Raman maps saved from Horiba LabSpec5 as text files,
+and it can fit each spectra in the map. While it does not yet produce a visual 
 map of the results, these are saved as (x, y, D5G). Plotting maps from
 the computed results is possible through a R script "plotramap.R"
 saved in /plotrmap. You can run the script with R. Make sure the filename is
 correctly set as the inputFile variable in the R script.
 
+Important note: The first two entries in the map file from Labspec are empty. 
+For MultiFit.py to work, please add 1 to the first two entries. For example, 
+for the first line of the file looking like:
 
-Future releases will allow for more flexibility as well as integrated plotting.
+		1000.4694	1001.6013	1002.7333
+
+Change it to:
+
+1	1	1000.4694	1001.6013	1002.7333
+
+This is a known issue.
 
 =========================================================================
 

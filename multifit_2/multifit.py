@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20150423a'
+    version = '2-20150910a'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -485,7 +485,7 @@ def usage():
     print(' python multifit.py -f filename n\n')
     print(' Batch processing:')
     print(' python multifit.py -b n\n')
-    print(' Map (acquired with horiba LabSpec5): ')
+    print(' Map (acquired with Horiba LabSpec5): ')
     print(' python multifit.py -m filename n\n')
     print(' Create and save plot of data only (no fit): ')
     print(' python multifit.py -p filename \n')
@@ -494,7 +494,12 @@ def usage():
     print(' Create new input paramter file (xlsx): ')
     print(' python multifit.py -i \n')
     print(' n = 0: PseudoVoigt 1: Gaussian 2: Lorentzian 3: Voigt\n')
-
+    print(' Important note: The first two entries in the map file from Labspec are empty.')
+    print(' For MultiFit.py to work, please add 1 to the first two entries. For example,')
+    print(' for the first line of the file looking like:\n')
+    print('                 1000.4694	1001.6013	1002.7333...')
+    print(' Change it to:\n')
+    print(' 1	1	1000.4694	1001.6013	1002.7333...\n\n')
 
 ####################################################################
 ''' Add blank line at the end of the summary spreadsheet '''
@@ -571,25 +576,6 @@ class Map:
     
     def draw(self, file, showplot):
         self.readCoord(file)
-#fig = plt.figure()
-#ax = fig.add_subplot(111, projection='3d')
-
-#p = ax.pcolor(self.x, self.y, self.z, cmap='Spectral', vmin=min(self.z), vmax=max(self.z))
-#fig.colorbar(p, ax=ax)
-#surf = ax.plot_trisurf(self.x, self.y, self.z, cmap=cm.jet, linewidth=0)
-#fig.colorbar(surf)
-
-#ax.xaxis.set_major_locator(MaxNLocator(5))
-#ax.yaxis.set_major_locator(MaxNLocator(6))
-#ax.zaxis.set_major_locator(MaxNLocator(5))
-#fig.tight_layout()
-
-#plt.xlabel('[um]')
-#plt.ylabel('[um]')
-#fig.savefig('map.png')  # Save plot
-#if(showplot == True):
-#    print('*** Close plot to quit ***\n')
-#    plt.show()
 
 
 
