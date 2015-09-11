@@ -24,26 +24,29 @@ Usage
 ./multifit.py -i
 
 where n:
-
-0: PseudoVoigt
-1: Gaussian
-2: Lorentzian
-3. Voigt
+    0: PseudoVoigt
+    1: Gaussian
+    2: Lorentzian
+    3. Voigt
 
 Fitting parameters are initialized within the
 "input_parameters.csv" Excel file.
 
 
-3. For Headless workstations:
-uncomment the two lines in multifit.py:
-    import matplotlib
-    matplotlib.use('Agg')
+7. For Headless workstations:
+    uncomment the two lines in multifit.py:
+        import matplotlib
+        matplotlib.use('Agg')
 
-4. unattended runtime (runs in the background in a headless workstation)
+8. Unattended runtime (runs in the background in a headless workstation)
 
-    nohop multifit.py > -m filename n > log.txt
+    multifit.py -m filename.txt 0 &>> log.txt &
 
-Log.txt will contain the output generated during the fit and usually displayed in the terminal.
+    or:
+    
+    nohop multifit.py > -m filename n > log.txt    
+
+    Log.txt will contain the output generated during the fit and usually displayed in the terminal.
 
 Installation
 =============
@@ -104,7 +107,7 @@ Install the following ports:
 4. MS Windows:
 ---------------
 
-Multifit should work on Windows with the proper dependencies installed see above).
+Multifit should work on Windows with the proper dependencies installed (see above).
 Support is not available.
 
 ========================================================================
