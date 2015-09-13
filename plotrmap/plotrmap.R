@@ -1,5 +1,5 @@
 ###=============================================================
-### plotrmap.R - 20150911b
+### plotrmap.R - 20150913a
 ### Nicola Ferralis <feranick@hotmail.com>
 ### The entire code is covered by GNU Public License (GPL) v.3
 ###=============================================================
@@ -7,7 +7,7 @@
 library(Hmisc);library(akima); library(fields);library(plotrix);
 library(spatstat);
 
-inputFile = "Filename_map.csv"
+inputFile = "Dracken-7-tracky_map1_bs_map_iGmore600.csv"
 
 # HC calibration
 a = 0.8692;
@@ -45,8 +45,9 @@ image.plot(int_hc, legend.args=list( text="H:C",cex=1.0, side=3, line=1), zlim=c
 z_d5g = as.im(int_d5g)
 z_hc = as.im(interp(x,y,hc, duplicate="mean"))
 
+plot(z_d5g, zlim=c(0,maxD5G))
 plot(z_d5g)
-plot(z_hc, zlim=c(0,1.2))
+plot(z_hc, zlim=c(0,maxHC))
 plot(z_hc)
 plot(blur(z_hc, 0.2, bleed=FALSE))
 
