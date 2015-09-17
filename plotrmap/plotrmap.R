@@ -1,5 +1,5 @@
 ###=============================================================
-### plotrmap.R - 20150917a
+### plotrmap.R - 20150917b
 ### Nicola Ferralis <feranick@hotmail.com>
 ### The entire code is covered by GNU Public License (GPL) v.3
 ###=============================================================
@@ -7,7 +7,7 @@
 library(Hmisc);library(akima); library(fields);library(plotrix);
 library(spatstat);
 
-inputFile = "Dracken-7-tracky_map1_bs_fit2_despiked_map.csv"
+inputFile = "Dracken-7-tracky_map2_fit2_map.csv"
 
 # HC calibration
 a = 0.8692;
@@ -36,9 +36,9 @@ int_hc = interp(x,y,hc, xo=seq(min(x), max(x), length = length(unique(x))), yo=s
 
 pdf(file=outFile, width=dimPlot, height=dimPlot, onefile=T)
 
-image.plot(int_d5g, legend.args=list( text="D5/G",cex=1.0, side=3, line=1), zlim=c(min(d5g),maxD5G), main=paste(inputFile,"\nAverage D5/G = ", format(round(mean(t[,3]),3),nsmall=3), "\u00b1", format(round(sd(t[,3]),3),nsmall=3)), xlab="um", ylab="um")
+image.plot(int_d5g, legend.args=list( text="D5/G",cex=1.0, side=3, line=1), zlim=c(min(d5g),maxD5G), main=paste(inputFile,"\nAverage D5/G = ", format(round(mean(t[,3]),3),nsmall=3), "\u00b1", format(round(sd(t[,3]),3),nsmall=3)), xlab="um", ylab="um", asp = 1)
 
-image.plot(int_hc, legend.args=list( text="H:C",cex=1.0, side=3, line=1), zlim=c(min(hc),maxHC), main=paste(inputFile,"\nAverage H:C = ", format(round(mean(t[,3]*a + b),3),nsmall=3), "\u00b1", format(round(sd(t[,3]*a + b),3),nsmall=3)), xlab="um", ylab="um")
+image.plot(int_hc, legend.args=list( text="H:C",cex=1.0, side=3, line=1), zlim=c(min(hc),maxHC), main=paste(inputFile,"\nAverage H:C = ", format(round(mean(t[,3]*a + b),3),nsmall=3), "\u00b1", format(round(sd(t[,3]*a + b),3),nsmall=3)), xlab="um", ylab="um", asp = 1)
 
 #Plot as image:
 
