@@ -1,5 +1,5 @@
 ###=============================================================
-### plotrmap.R - 20150913a
+### plotrmap.R - 20150917a
 ### Nicola Ferralis <feranick@hotmail.com>
 ### The entire code is covered by GNU Public License (GPL) v.3
 ###=============================================================
@@ -7,7 +7,7 @@
 library(Hmisc);library(akima); library(fields);library(plotrix);
 library(spatstat);
 
-inputFile = "Dracken-7-tracky_map1_bs_map_iGmore600.csv"
+inputFile = "Dracken-7-tracky_map1_bs_fit2_despiked_map.csv"
 
 # HC calibration
 a = 0.8692;
@@ -31,8 +31,8 @@ d5g=as.vector(t[,3])
 hc=as.vector(t[,3]*a + b)
 
 # Plot as matrix
-int_d5g = interp(x,y,d5g, duplicate="mean")
-int_hc = interp(x,y,hc,xo=seq(min(x),max(x),length = step), yo=seq(min(y),max(y),length = step), duplicate="mean")
+int_d5g = interp(x,y,d5g, xo=seq(min(x), max(x), length = length(unique(x))), yo=seq(min(y), max(y), length = length(unique(y))), duplicate="mean")
+int_hc = interp(x,y,hc, xo=seq(min(x), max(x), length = length(unique(x))), yo=seq(min(y), max(y), length = length(unique(y))), duplicate="mean")
 
 pdf(file=outFile, width=dimPlot, height=dimPlot, onefile=T)
 
@@ -45,7 +45,7 @@ image.plot(int_hc, legend.args=list( text="H:C",cex=1.0, side=3, line=1), zlim=c
 z_d5g = as.im(int_d5g)
 z_hc = as.im(interp(x,y,hc, duplicate="mean"))
 
-plot(z_d5g, zlim=c(0,maxD5G))
+plot(z_d5g, zlim=c(0,maxD5G), xlab="um",ylab="um",xlim=c(min(x),max(x)),ylim=c(min(y),max(y)))
 plot(z_d5g)
 plot(z_hc, zlim=c(0,maxHC))
 plot(z_hc)
