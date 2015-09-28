@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20150910a'
+    version = '2-20150928a'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -42,9 +42,9 @@ class defPar:
     ###     second: max specified.
     numProc = mp.cpu_count()
     #numProc = 4
-    ### Parameters for H:C conversion
-    mHC = 0.8692
-    bHC = -0.0545
+    ### Parameters for H:C conversion - 2015-09-25
+    mHC = 0.8824
+    bHC = -0.0575
 
 ####################################################################
 ''' Main routine to perform and plot the fit '''
