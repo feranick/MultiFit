@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20150928a'
+    version = '2-20151001a'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -126,6 +126,7 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
         d1g = out.best_values['p2_amplitude']/out.best_values['p5_amplitude']
         d1d1g = out.best_values['p2_amplitude']/(out.best_values['p2_amplitude']+out.best_values['p5_amplitude'])
         hc = defPar.mHC*d5g + defPar.bHC
+        wG = out.best_values['p5_sigma']*2
 
     if (processMap == False):
         if (fpeak[1] == 1 & fpeak[2] == 1 & fpeak[5] == 1):
@@ -178,14 +179,14 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
         sum_file.close()
     
     if(processMap == True):
-        with open(os.path.splitext(file)[0] + '_map.csv', "a") as coord_file:
-            coord_file.write('{:},'.format(x1))
-            coord_file.write('{:},'.format(y1))
-            if (out.success == True and out.redchi < defPar.redchi):
-                coord_file.write('{:}\n'.format(d5g))
-            else:
-                coord_file.write('{:}\n'.format(defPar.outliar))
-            coord_file.close()
+        saveMap(file, out, 'D5G', d5g, x1, y1)
+        saveMap(file, out, 'D4D5G', d4d5g, x1, y1)
+        saveMap(file, out, 'D1G', d1g, x1, y1)
+        saveMap(file, out, 'D1GD1', d1d1g, x1, y1)
+        saveMap(file, out, 'HC', hc, x1, y1)
+        saveMap(file, out, 'wG', wG, x1, y1)
+        saveMapClust(file, out, hc, wG, d5g, d1g, d4d5g, d4d5g+d1g, x1, y1, lab)
+
     else:
         ### Plot optimal fit and individial components
         fig = plt.figure()
@@ -320,21 +321,23 @@ def main():
             except:
                 usage()
                 sys.exit(2)
+
             file = str(sys.argv[2])
             type = int(sys.argv[3])
             rm = readMap(file)
             map = Map()
+            i=0
             if(defPar.multiproc == True):
                 p = Pool(defPar.numProc)
                 for i in range (1, rm.num_lines):
-                    p.apply_async(calculate, args=(rm.x, rm.y[i], rm.x1[i], rm.y1[i], file, type, True, False, ''))
+                    p.apply_async(calculate, args=(rm.x, rm.y[i], rm.x1[i], rm.y1[i], file, type, True, False, i))
                 p.close()
                 p.join()
             #map.draw(os.path.splitext(file)[0] + '_map.txt', True)
 
             else:
                 for i in range (1, rm.num_lines):
-                    calculate(rm.x, rm.y[i], rm.x1[i], rm.y1[i], file, type, True, False, '')
+                    calculate(rm.x, rm.y[i], rm.x1[i], rm.y1[i], file, type, True, False, i)
                 #map.draw(os.path.splitext(file)[0] + '_map.txt', True)
 
         elif o in ("-t", "--test"):
@@ -555,6 +558,46 @@ def plotData(x, y, file, showPlot):
         plt.show()
     plt.close()
 
+####################################################################
+''' Save map files '''
+####################################################################
+
+def saveMap(file, out, extension, s, x1, y1):
+    inputFile = os.path.splitext(file)[0] + '_' + extension + '_map.csv'
+    with open(inputFile, "a") as coord_file:
+        coord_file.write('{:},'.format(x1))
+        coord_file.write('{:},'.format(y1))
+        if (out.success == True and out.redchi < defPar.redchi):
+            coord_file.write('{:}\n'.format(s))
+        else:
+            coord_file.write('{:}\n'.format(defPar.outliar))
+        coord_file.close()
+
+def saveMapClust(file, out, s1, s2, s3, s4, s5, s6, x1, y1, lab):
+    inputFile = os.path.splitext(file)[0] + '_mapclust.csv'
+    
+    if (os.path.exists(inputFile) == False):
+        with open(inputFile, "a") as coord_file:
+            coord_file.write(',HC,wG,D5G,D1G,D4D5G,DG,X,Y\n')
+            coord_file.close()
+
+    with open(inputFile, "a") as coord_file:
+        if (out.success == True and out.redchi < defPar.redchi):
+            coord_file.write('{:},'.format(lab))
+            coord_file.write('{:},'.format(s1))
+            coord_file.write('{:},'.format(s2))
+            coord_file.write('{:},'.format(s3))
+            coord_file.write('{:},'.format(s4))
+            coord_file.write('{:},'.format(s5))
+            coord_file.write('{:},'.format(s6))
+        else:
+            coord_file.write('{:},'.format(lab))
+            for i in range (0, 6):
+                coord_file.write('{:},'.format(defPar.outliar))
+
+        coord_file.write('{:},'.format(x1))
+        coord_file.write('{:}\n'.format(y1))
+        coord_file.close()
 
 ####################################################################
 ''' Definition of class map'''
