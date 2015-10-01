@@ -1,13 +1,11 @@
 ###=============================================================
-### plotrmap.R - 20150917b
+### plotrmap.R - 20151001a
 ### Nicola Ferralis <feranick@hotmail.com>
 ### The entire code is covered by GNU Public License (GPL) v.3
 ###=============================================================
 
 library(Hmisc);library(akima); library(fields);library(plotrix);
 library(spatstat);
-
-inputFile = "Dracken-7-tracky_map2_fit2_map.csv"
 
 # HC calibration
 a = 0.8692;
@@ -17,7 +15,16 @@ maxHC = 1.2;
 
 step = 60;
 dimPlot=7;
-rootName=gsub(".csv","",inputFile)
+
+
+##########################################
+# Get list of Files
+##########################################
+
+listOfFiles <- list.files(pattern= "_map.csv")
+inputFile<-as.matrix(listOfFiles)
+
+rootName=gsub("_map.csv","",inputFile)
 outFile<-paste(rootName,"-plots.pdf",sep="")
 
 # Read X, Y data in matrix
