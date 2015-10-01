@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20151001a'
+    version = '2-20151001b'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -185,7 +185,12 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
         saveMap(file, out, 'D1GD1', d1d1g, x1, y1)
         saveMap(file, out, 'HC', hc, x1, y1)
         saveMap(file, out, 'wG', wG, x1, y1)
-        saveMapClust(file, out, hc, wG, d5g, d1g, d4d5g, d4d5g+d1g, x1, y1, lab)
+        saveMapMulti(file, out, hc, wG, d5g, d1g, d4d5g, d4d5g+d1g, x1, y1, lab,1)
+        saveMapMulti(file, out, hc, wG, out.best_values['p5_amplitude'], \
+                     out.best_values['p2_amplitude'], \
+                     out.best_values['p1_amplitude'], \
+                     out.best_values['p0_amplitude'], x1, y1, lab, 2)
+
 
     else:
         ### Plot optimal fit and individial components
@@ -573,12 +578,19 @@ def saveMap(file, out, extension, s, x1, y1):
             coord_file.write('{:}\n'.format(defPar.outliar))
         coord_file.close()
 
-def saveMapClust(file, out, s1, s2, s3, s4, s5, s6, x1, y1, lab):
-    inputFile = os.path.splitext(file)[0] + '_mapclust.csv'
+def saveMapMulti(file, out, s1, s2, s3, s4, s5, s6, x1, y1, lab, mtype):
+
+    if(mtype == 1):
+        inputFile = os.path.splitext(file)[0] + '_map-ratio.csv'
+    else:
+        inputFile = os.path.splitext(file)[0] + '_map-int.csv'
     
     if (os.path.exists(inputFile) == False):
         with open(inputFile, "a") as coord_file:
-            coord_file.write(',HC,wG,D5G,D1G,D4D5G,DG,X,Y\n')
+            if(mtype == 1):
+                coord_file.write(',HC,wG,D5G,D1G,D4D5G,DG,X,Y\n')
+            else:
+                coord_file.write(',HC,wG,G,D1,D5,D4,X,Y\n')
             coord_file.close()
 
     with open(inputFile, "a") as coord_file:
@@ -598,6 +610,7 @@ def saveMapClust(file, out, s1, s2, s3, s4, s5, s6, x1, y1, lab):
         coord_file.write('{:},'.format(x1))
         coord_file.write('{:}\n'.format(y1))
         coord_file.close()
+
 
 ####################################################################
 ''' Definition of class map'''
