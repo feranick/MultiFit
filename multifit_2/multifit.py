@@ -224,6 +224,7 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
         plt.title(file)
         plt.legend()
         plt.grid(True)
+        plt.xlim([min(x), max(x)])
         plt.savefig(plotfile, dpi = defPar.dpiPlot)  # Save plot
         if(showPlot == True):
             print('*** Close plot to quit ***\n')
