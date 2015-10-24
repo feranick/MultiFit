@@ -42,6 +42,9 @@ class defPar:
     ###     second: max specified.
     numProc = mp.cpu_count()
     #numProc = 4
+    
+    ### Resolution for plots
+    dpiPlot = 150
     ### Parameters for H:C conversion - 2015-09-25
     mHC = 0.8824
     bHC = -0.0575
@@ -221,7 +224,7 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
         plt.title(file)
         plt.legend()
         plt.grid(True)
-        plt.savefig(plotfile)  # Save plot
+        plt.savefig(plotfile, dpi = dpiPlot)  # Save plot
         if(showPlot == True):
             print('*** Close plot to quit ***\n')
             plt.show()
@@ -557,7 +560,7 @@ def plotData(x, y, file, showPlot):
     plt.title(file)
     #plt.legend()
     plt.grid(True)
-    plt.savefig(pngData)  # Save plot
+    plt.savefig(pngData, dpi = dpiPlot)  # Save plot
     if(showPlot == True):
         print('*** Close plot to quit ***\n')
         plt.show()
