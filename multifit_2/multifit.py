@@ -224,7 +224,7 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
         plt.title(file)
         plt.legend()
         plt.grid(True)
-        plt.savefig(plotfile, dpi = dpiPlot)  # Save plot
+        plt.savefig(plotfile, dpi = defPar.dpiPlot)  # Save plot
         if(showPlot == True):
             print('*** Close plot to quit ***\n')
             plt.show()
@@ -560,7 +560,7 @@ def plotData(x, y, file, showPlot):
     plt.title(file)
     #plt.legend()
     plt.grid(True)
-    plt.savefig(pngData, dpi = dpiPlot)  # Save plot
+    plt.savefig(pngData, dpi = defPar.dpiPlot)  # Save plot
     if(showPlot == True):
         print('*** Close plot to quit ***\n')
         plt.show()
