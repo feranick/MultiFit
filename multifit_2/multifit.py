@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20151001b'
+    version = '2-20151023a'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -212,7 +212,7 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
                 else:
                     ax.plot(x,y[i],'g')
 
-        ax.text(0.05, 0.875, 'Fit type: {:}\nH:C = {:f}\nRed. Chi sq: {:}'.format( \
+        ax.text(0.05, 0.875, 'Fit type: {:}\nD5/G = {:f}\nRed. Chi sq: {:}'.format( \
                                 p.typec, \
                                 d5g, out.redchi), transform=ax.transAxes)
 
