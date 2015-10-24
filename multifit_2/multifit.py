@@ -202,9 +202,9 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
         
         ax.plot(x, out.best_fit, 'r-', label='fit')
         y0 = p.peak[0].eval(x = x, **out.best_values)
-        ax.plot(x,y0,'g')
+        #ax.plot(x,y0,'g')
         y = [None]*(defPar.NumPeaks + 1)
-        for i in range (1,defPar.NumPeaks):
+        for i in range (0,defPar.NumPeaks):
             if (fpeak[i] ==1):
                 y[i] = p.peak[i].eval(x = x, **out.best_values)
                 if (i==1 or i==5):
