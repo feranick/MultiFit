@@ -124,21 +124,21 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
         header = False
         print('\nFit successful: ' + str(out.success))
 
-        d5g = out.best_values['p1_amplitude']/out.best_values['p5_amplitude']
-        d4d5g = (out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']
-        d1g = out.best_values['p2_amplitude']/out.best_values['p5_amplitude']
-        d1d1g = out.best_values['p2_amplitude']/(out.best_values['p2_amplitude']+out.best_values['p5_amplitude'])
+        d5g = out.best_values['p2_amplitude']/out.best_values['p6_amplitude']
+        d4d5g = (out.best_values['p1_amplitude']+out.best_values['p2_amplitude'])/out.best_values['p6_amplitude']
+        d1g = out.best_values['p3_amplitude']/out.best_values['p6_amplitude']
+        d1d1g = out.best_values['p3_amplitude']/(out.best_values['p3_amplitude']+out.best_values['p6_amplitude'])
         hc = defPar.mHC*d5g + defPar.bHC
-        wG = out.best_values['p5_sigma']*2
+        wG = out.best_values['p6_sigma']*2
 
     if (processMap == False):
-        if (fpeak[1] == 1 & fpeak[2] == 1 & fpeak[5] == 1):
+        if (fpeak[2] == 1 & fpeak[3] == 1 & fpeak[6] == 1):
             print('D5/G = {:f}'.format(d5g))
             print('H:C = {:f}'.format(hc))
             print('(D4+D5)/G = {:f}'.format(d4d5g))
             print('D1/G = {:f}'.format(d1g))
             if type ==0:
-                print('G: {:f}% Gaussian'.format(out.best_values['p5_fraction']*100))
+                print('G: {:f}% Gaussian'.format(out.best_values['p6_fraction']*100))
             print('Fit type: {:}'.format(p.typec))
             print('Chi-square: {:}'.format(out.chisqr))
             print('Reduced Chi-square: {:}\n'.format(out.redchi))
@@ -160,16 +160,16 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
     ### Write Summary
     summaryFile = [file, \
             d5g, d4d5g, hc, d1g, d1d1g, \
-            out.best_values['p2_amplitude'], \
-            out.best_values['p0_amplitude'], \
+            out.best_values['p3_amplitude'], \
             out.best_values['p1_amplitude'], \
-            out.best_values['p5_amplitude'], \
-            out.best_values['p5_sigma']*2, \
-            out.best_values['p5_center']]
+            out.best_values['p2_amplitude'], \
+            out.best_values['p6_amplitude'], \
+            out.best_values['p6_sigma']*2, \
+            out.best_values['p6_center']]
     if type ==0:
-        summaryFile.extend([out.best_values['p1_fraction'], \
-                        out.best_values['p2_fraction'], \
-                        out.best_values['p2_fraction']])
+        summaryFile.extend([out.best_values['p2_fraction'], \
+                        out.best_values['p3_fraction'], \
+                        out.best_values['p6_fraction']])
     else:
         for i in range(0,3):
             summaryFile.extend([type-1])
@@ -189,10 +189,10 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
         saveMap(file, out, 'HC', hc, x1, y1)
         saveMap(file, out, 'wG', wG, x1, y1)
         saveMapMulti(file, out, hc, wG, d5g, d1g, d4d5g, d4d5g+d1g, x1, y1, lab,1)
-        saveMapMulti(file, out, hc, wG, out.best_values['p5_amplitude'], \
+        saveMapMulti(file, out, hc, wG, out.best_values['p6_amplitude'], \
+                     out.best_values['p3_amplitude'], \
                      out.best_values['p2_amplitude'], \
-                     out.best_values['p1_amplitude'], \
-                     out.best_values['p0_amplitude'], x1, y1, lab, 2)
+                     out.best_values['p1_amplitude'], x1, y1, lab, 2)
 
 
     else:
@@ -210,7 +210,7 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
         for i in range (0,defPar.NumPeaks):
             if (fpeak[i] ==1):
                 y[i] = p.peak[i].eval(x = x, **out.best_values)
-                if (i==1 or i==5):
+                if (i==2 or i==6):
                     ax.plot(x,y[i],'g',linewidth=2.0)
                 else:
                     ax.plot(x,y[i],'g')
