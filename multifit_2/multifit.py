@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20151025a'
+    version = '2-20151025b'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -45,6 +45,10 @@ class defPar:
     
     ### Resolution for plots
     dpiPlot = 150
+    ###Format Plot
+    formatPlot = 0  #png
+    #formatPlot = 1  #svg
+    
     ### Parameters for H:C conversion - 2015-09-25
     mHC = 0.8824
     bHC = -0.0575
@@ -116,7 +120,7 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
 
     ### Output file names.
     outfile = 'fit_' + file         # Save individual fitting results
-    plotfile = os.path.splitext(file)[0] + '_fit.png'   # Save plot as image
+    plotfile = os.path.splitext(file)[0] + '_fit'   # Save plot as image
 
     if os.path.isfile(defPar.summary) == False:
         header = True
@@ -225,7 +229,12 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
         plt.legend()
         plt.grid(True)
         plt.xlim([min(x), max(x)])
-        plt.savefig(plotfile, dpi = defPar.dpiPlot)  # Save plot
+
+        if(defPar.formatPlot == 0):
+            plt.savefig(plotfile + '.png', dpi = defPar.dpiPlot, format = 'png')  # Save plot
+        if(defPar.formatPlot == 1):
+            plt.savefig(plotfile + '.svg', dpi = defPar.dpiPlot, format = 'svg')  # Save plot
+
         if(showPlot == True):
             print('*** Close plot to quit ***\n')
             plt.show()
@@ -552,7 +561,7 @@ def nulStrConvDigit(x):
 
 def plotData(x, y, file, showPlot):
     ### Plot initial data
-    pngData = os.path.splitext(file)[0] + '.png'   # Save plot as image
+    pngData = os.path.splitext(file)[0]   # Save plot as image
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.plot(x, y, label='data')
@@ -561,7 +570,12 @@ def plotData(x, y, file, showPlot):
     plt.title(file)
     #plt.legend()
     plt.grid(True)
-    plt.savefig(pngData, dpi = defPar.dpiPlot)  # Save plot
+    
+    if(defPar.formatPlot == 0):
+        plt.savefig(pngData + '.png', dpi = defPar.dpiPlot, format = 'png')  # Save plot
+    if(defPar.formatPlot == 1):
+        plt.savefig(pngData + '.svg', dpi = defPar.dpiPlot, format = 'svg')  # Save plot
+
     if(showPlot == True):
         print('*** Close plot to quit ***\n')
         plt.show()
