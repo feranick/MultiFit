@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20151025b'
+    version = '2-20151025c'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -459,8 +459,8 @@ def genInitPar():
         initPar = [('name', 'Base', 'D4', 'D5', 'D1', 'D3a', 'D3b', 'G', 'D2'), \
             ('activate peak',1,1,1,1,1,1,1,1), \
             ('center',1080,1160,1250,1330,1400,1470,1590,1710), \
-            ('center min','',1240,'','','','',''), \
-            ('center max','',1275,'','','','',''), \
+            ('center min','','',1240,'','','','',''), \
+            ('center max','','',1275,'','','','',''), \
             ('sigma',20,20,20,40,20,10,20,20), \
             ('sigma min',10,10,10,10,10,5,10,10), \
             ('sigma max',50,50,50,50,50,50,50,50), \
