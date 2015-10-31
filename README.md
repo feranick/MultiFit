@@ -139,7 +139,11 @@ This is a known issue.
 Version history:
 ================
 
-v.2: It uses a peak guessing algorithm, for more accurate results.  
+v.3: New peak added in init file at 1050 1/cm. This makes it incompatible 
+with previous version
+
+v.2: It uses a peak guessing algorithm, for more accurate results. The initial peak
+is at 1140 1/cm
 
 v.1: It uses a static initialization for the fitting parameters
 

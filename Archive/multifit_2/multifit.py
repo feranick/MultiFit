@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20151025c'
+    version = '2-20151023a'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -45,10 +45,6 @@ class defPar:
     
     ### Resolution for plots
     dpiPlot = 150
-    ###Format Plot
-    formatPlot = 0  #png
-    #formatPlot = 1  #svg
-    
     ### Parameters for H:C conversion - 2015-09-25
     mHC = 0.8824
     bHC = -0.0575
@@ -120,7 +116,7 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
 
     ### Output file names.
     outfile = 'fit_' + file         # Save individual fitting results
-    plotfile = os.path.splitext(file)[0] + '_fit'   # Save plot as image
+    plotfile = os.path.splitext(file)[0] + '_fit.png'   # Save plot as image
 
     if os.path.isfile(defPar.summary) == False:
         header = True
@@ -128,21 +124,21 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
         header = False
         print('\nFit successful: ' + str(out.success))
 
-        d5g = out.best_values['p2_amplitude']/out.best_values['p6_amplitude']
-        d4d5g = (out.best_values['p1_amplitude']+out.best_values['p2_amplitude'])/out.best_values['p6_amplitude']
-        d1g = out.best_values['p3_amplitude']/out.best_values['p6_amplitude']
-        d1d1g = out.best_values['p3_amplitude']/(out.best_values['p3_amplitude']+out.best_values['p6_amplitude'])
+        d5g = out.best_values['p1_amplitude']/out.best_values['p5_amplitude']
+        d4d5g = (out.best_values['p0_amplitude']+out.best_values['p1_amplitude'])/out.best_values['p5_amplitude']
+        d1g = out.best_values['p2_amplitude']/out.best_values['p5_amplitude']
+        d1d1g = out.best_values['p2_amplitude']/(out.best_values['p2_amplitude']+out.best_values['p5_amplitude'])
         hc = defPar.mHC*d5g + defPar.bHC
-        wG = out.best_values['p6_sigma']*2
+        wG = out.best_values['p5_sigma']*2
 
     if (processMap == False):
-        if (fpeak[2] == 1 & fpeak[3] == 1 & fpeak[6] == 1):
+        if (fpeak[1] == 1 & fpeak[2] == 1 & fpeak[5] == 1):
             print('D5/G = {:f}'.format(d5g))
             print('H:C = {:f}'.format(hc))
             print('(D4+D5)/G = {:f}'.format(d4d5g))
             print('D1/G = {:f}'.format(d1g))
             if type ==0:
-                print('G: {:f}% Gaussian'.format(out.best_values['p6_fraction']*100))
+                print('G: {:f}% Gaussian'.format(out.best_values['p5_fraction']*100))
             print('Fit type: {:}'.format(p.typec))
             print('Chi-square: {:}'.format(out.chisqr))
             print('Reduced Chi-square: {:}\n'.format(out.redchi))
@@ -164,16 +160,16 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
     ### Write Summary
     summaryFile = [file, \
             d5g, d4d5g, hc, d1g, d1d1g, \
-            out.best_values['p3_amplitude'], \
-            out.best_values['p1_amplitude'], \
             out.best_values['p2_amplitude'], \
-            out.best_values['p6_amplitude'], \
-            out.best_values['p6_sigma']*2, \
-            out.best_values['p6_center']]
+            out.best_values['p0_amplitude'], \
+            out.best_values['p1_amplitude'], \
+            out.best_values['p5_amplitude'], \
+            out.best_values['p5_sigma']*2, \
+            out.best_values['p5_center']]
     if type ==0:
-        summaryFile.extend([out.best_values['p2_fraction'], \
-                        out.best_values['p3_fraction'], \
-                        out.best_values['p6_fraction']])
+        summaryFile.extend([out.best_values['p1_fraction'], \
+                        out.best_values['p2_fraction'], \
+                        out.best_values['p2_fraction']])
     else:
         for i in range(0,3):
             summaryFile.extend([type-1])
@@ -193,10 +189,10 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
         saveMap(file, out, 'HC', hc, x1, y1)
         saveMap(file, out, 'wG', wG, x1, y1)
         saveMapMulti(file, out, hc, wG, d5g, d1g, d4d5g, d4d5g+d1g, x1, y1, lab,1)
-        saveMapMulti(file, out, hc, wG, out.best_values['p6_amplitude'], \
-                     out.best_values['p3_amplitude'], \
+        saveMapMulti(file, out, hc, wG, out.best_values['p5_amplitude'], \
                      out.best_values['p2_amplitude'], \
-                     out.best_values['p1_amplitude'], x1, y1, lab, 2)
+                     out.best_values['p1_amplitude'], \
+                     out.best_values['p0_amplitude'], x1, y1, lab, 2)
 
 
     else:
@@ -214,7 +210,7 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
         for i in range (0,defPar.NumPeaks):
             if (fpeak[i] ==1):
                 y[i] = p.peak[i].eval(x = x, **out.best_values)
-                if (i==2 or i==6):
+                if (i==1 or i==5):
                     ax.plot(x,y[i],'g',linewidth=2.0)
                 else:
                     ax.plot(x,y[i],'g')
@@ -229,12 +225,7 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
         plt.legend()
         plt.grid(True)
         plt.xlim([min(x), max(x)])
-
-        if(defPar.formatPlot == 0):
-            plt.savefig(plotfile + '.png', dpi = defPar.dpiPlot, format = 'png')  # Save plot
-        if(defPar.formatPlot == 1):
-            plt.savefig(plotfile + '.svg', dpi = defPar.dpiPlot, format = 'svg')  # Save plot
-
+        plt.savefig(plotfile, dpi = defPar.dpiPlot)  # Save plot
         if(showPlot == True):
             print('*** Close plot to quit ***\n')
             plt.show()
@@ -456,20 +447,20 @@ def genInitPar():
         print(' Input parameter file: ' + defPar.inputParFile + ' already exists\n')
         sys.exit(2)
     else:
-        initPar = [('name', 'Base', 'D4', 'D5', 'D1', 'D3a', 'D3b', 'G', 'D2'), \
-            ('activate peak',1,1,1,1,1,1,1,1), \
-            ('center',1080,1160,1250,1330,1400,1470,1590,1710), \
-            ('center min','','',1240,'','','','',''), \
-            ('center max','','',1275,'','','','',''), \
-            ('sigma',20,20,20,40,20,10,20,20), \
-            ('sigma min',10,10,10,10,10,5,10,10), \
-            ('sigma max',50,50,50,50,50,50,50,50), \
-            ('amplitude','','','','','','','',''), \
-            ('ampl. min',0,0,0,0,0,0,0,0), \
-            ('ampl. max','','','','','','','',''), \
-            ('fraction',0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5), \
-            ('fraction min',0,0,0,0,0,0,0,0), \
-            ('fraction max',1,1,1,1,1,1,1,1)]
+        initPar = [('name', 'D4', 'D5', 'D1', 'D3a', 'D3b', 'G', 'D2'), \
+            ('activate peak',1,1,1,0,1,1,0), \
+            ('center',1160,1250,1330,1400,1470,1590,1680), \
+            ('center min','',1240,'','','','',''), \
+            ('center max','',1275,'','','','',''), \
+            ('sigma',20,20,40,20,10,20,20), \
+            ('sigma min',10,10,10,10,5,10,10), \
+            ('sigma max',50,50,50,50,50,50,50), \
+            ('amplitude','','','','','','',''), \
+            ('ampl. min',0,0,0,0,0,0,0), \
+            ('ampl. max','','','','','','',''), \
+            ('fraction',0.5,0.5,0.5,0.5,0.5,0.5,0.5), \
+            ('fraction min',0,0,0,0,0,0,0), \
+            ('fraction max',1,1,1,1,1,1,1)]
             
         with open(defPar.inputParFile, "a") as inputFile:
             csv_out=csv.writer(inputFile)
@@ -561,7 +552,7 @@ def nulStrConvDigit(x):
 
 def plotData(x, y, file, showPlot):
     ### Plot initial data
-    pngData = os.path.splitext(file)[0]   # Save plot as image
+    pngData = os.path.splitext(file)[0] + '.png'   # Save plot as image
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.plot(x, y, label='data')
@@ -570,12 +561,7 @@ def plotData(x, y, file, showPlot):
     plt.title(file)
     #plt.legend()
     plt.grid(True)
-    
-    if(defPar.formatPlot == 0):
-        plt.savefig(pngData + '.png', dpi = defPar.dpiPlot, format = 'png')  # Save plot
-    if(defPar.formatPlot == 1):
-        plt.savefig(pngData + '.svg', dpi = defPar.dpiPlot, format = 'svg')  # Save plot
-
+    plt.savefig(pngData, dpi = defPar.dpiPlot)  # Save plot
     if(showPlot == True):
         print('*** Close plot to quit ***\n')
         plt.show()
