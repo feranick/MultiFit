@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 ###=============================================================
-### Multifit 2
+### Multifit 3
 ### Nicola Ferralis <feranick@hotmail.com>
 ### The entire code is covered by GNU Public License (GPL) v.3
 ###=============================================================
