@@ -22,9 +22,9 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '2-20151023a'
+    version = '2-20151103a'
     ### Define number of total peaks (do not change: this is read from file)
-    NumPeaks = 0
+    numPeaks = 0
     ### Name input paramter file
     inputParFile = 'input_parameters.csv'
     # Save summary fitting results
@@ -61,24 +61,24 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
         numRows = 0
         inval=[]
         for row in input:
-            defPar.NumPeaks = len(row)-1
+            defPar.numPeaks = len(row)-1
             row = [nulStrConvDigit(entry) for entry in row]
             inval.append(row)
             numRows +=1
         inputFile.close()
-    inv = resize(inval, [numRows, defPar.NumPeaks+1])
+    inv = resize(inval, [numRows, defPar.numPeaks+1])
     fpeak = []
 
     # define active peaks
-    for i in range(1, defPar.NumPeaks+1):
+    for i in range(1, defPar.numPeaks+1):
         fpeak.extend([int(inv[1,i])])
 
     p = Peak(type)
-    print (' Fitting with ' + str(defPar.NumPeaks) + ' (' + p.typec + ') peaks')
+    print (' Fitting with ' + str(defPar.numPeaks) + ' (' + p.typec + ') peaks')
     
     ### Initialize parameters for fit.
     pars = p.peak[0].make_params()
-    for i in range (0, defPar.NumPeaks):
+    for i in range (0, defPar.numPeaks):
         if fpeak[i]!=0:
 
             fac = 2
@@ -99,7 +99,7 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
 
     ### Add relevant peak to fitting procedure.
     mod = p.peak[0]
-    for i in range (1,defPar.NumPeaks):
+    for i in range (1,defPar.numPeaks):
         if fpeak[i]!=0:
             mod += p.peak[i]
 
@@ -206,8 +206,8 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
         ax.plot(x, out.best_fit, 'r-', label='fit')
         y0 = p.peak[0].eval(x = x, **out.best_values)
         #ax.plot(x,y0,'g')
-        y = [None]*(defPar.NumPeaks + 1)
-        for i in range (0,defPar.NumPeaks):
+        y = [None]*(defPar.numPeaks + 1)
+        for i in range (0,defPar.numPeaks):
             if (fpeak[i] ==1):
                 y[i] = p.peak[i].eval(x = x, **out.best_values)
                 if (i==1 or i==5):
@@ -414,27 +414,27 @@ class Peak:
     ### Define the typology of the peak
     def __init__(self, type):
         
-        self.peak= [None]*(defPar.NumPeaks)
+        self.peak= [None]*(defPar.numPeaks)
         
         if type==0:
-            for i in range (0,defPar.NumPeaks):
+            for i in range (0,defPar.numPeaks):
                 self.peak[i] = PseudoVoigtModel(prefix="p"+ str(i) +"_")
             self.typec = "PseudoVoigt"
         elif type == 1:
-            for i in range (0,defPar.NumPeaks):
+            for i in range (0,defPar.numPeaks):
                 self.peak[i] = GaussianModel(prefix="p"+ str(i) +"_")
             self.typec = "Gauss"
         elif type == 2:
-            for i in range (0,defPar.NumPeaks):
+            for i in range (0,defPar.numPeaks):
                 self.peak[i] = LorentzianModel(prefix="p"+ str(i) +"_")
             self.typec = "Lorentz"
         elif type ==3:
-            for i in range (0,defPar.NumPeaks):
+            for i in range (0,defPar.numPeaks):
                 self.peak[i] = VoigtModel(prefix="p"+ str(i) +"_")
             self.typec = "Voigt"
         else:
             print("Warning: type undefined. Using PseudoVoigt")
-            for i in range (0,defPar.NumPeaks):
+            for i in range (0,defPar.numPeaks):
                 self.peak[i] = PseudoVoigtModel(prefix="p"+ str(i) +"_")
             self.typec = "PVoigt"
 
