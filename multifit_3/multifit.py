@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '3-20151031a'
+    version = '3-20151103a'
     ### Define number of total peaks (do not change: this is read from file)
     NumPeaks = 0
     ### Name input paramter file
@@ -42,6 +42,9 @@ class defPar:
     ###     second: max specified.
     numProc = mp.cpu_count()
     #numProc = 4
+    
+    ### Peak search optimization
+    peakPosOpt = False
     
     ### Resolution for plots
     dpiPlot = 150
@@ -79,13 +82,23 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
 
     p = Peak(type)
     print (' Fitting with ' + str(defPar.NumPeaks) + ' (' + p.typec + ') peaks')
+    if(defPar.peakPosOpt==True):
+        print(' Peak Search Optimization: ON\n')
+    else:
+        print(' Peak Search Optimization: OFF\n')
     
     ### Initialize parameters for fit.
     pars = p.peak[0].make_params()
     for i in range (0, defPar.NumPeaks):
         if fpeak[i]!=0:
 
-            fac = 2
+            fac1 = 2
+            if (defPar.peakPosOpt == True):
+                fac = fac1 - abs(y[ix(x,inv[2,i+1]+fac1*inv[5,i+1])] - y[ix(x,inv[2,i+1]-fac1*inv[5,i+1])]) / \
+                        max(y[ix(x,inv[2,i+1]-fac1*inv[5,i+1]):ix(x,inv[2,i+1]+fac1*inv[5,i+1])])
+            else:
+                fac = fac1
+
             print(' Peak {:}'.format(str(i)) +': [' + str(inv[2,i+1]-fac*inv[5,i+1]) + ', ' + \
                   str(inv[2,i+1]+fac*inv[5,i+1]) + ']')
 
