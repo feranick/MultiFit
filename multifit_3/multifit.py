@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '3-20151103b'
+    version = '3-20151104a'
     ### Define number of total peaks (do not change: this is read from file)
     numPeaks = 0
     ### Name input paramter file
@@ -81,7 +81,13 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
         fpeak.extend([int(inv[1,i])])
 
     p = Peak(type)
-    print (' Fitting with ' + str(defPar.numPeaks) + ' (' + p.typec + ') peaks')
+
+    numActivePeaks = 0
+    for i in range (0, defPar.numPeaks):
+        if fpeak[i] != 0:
+            numActivePeaks +=1
+
+    print (' Fitting with ' + str(numActivePeaks) + ' (' + p.typec + ') peaks')
     if(defPar.peakPosOpt==True):
         print(' Peak Search Optimization: ON\n')
     else:
@@ -115,10 +121,13 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
 
 
     ### Add relevant peak to fitting procedure.
-    mod = p.peak[0]
-    for i in range (1,defPar.numPeaks):
+
+    mod = p.peak[1]
+    for i in range (2,defPar.numPeaks):
         if fpeak[i]!=0:
             mod += p.peak[i]
+    if fpeak[0] != 0:
+        mod += p.peak[0]
 
     ### Initialize prefitting curves
     init = mod.eval(pars, x=x)
