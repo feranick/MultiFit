@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '4-20151104h'
+    version = '4-20151104i'
     ### Define number of total peaks (do not change: this is read from file)
     numPeaks = 0
     ### Name input paramter file
@@ -50,6 +50,9 @@ class defPar:
     dpiPlot = 150
     formatPlot = 0  #png
     #formatPlot = 1  #svg
+    
+    ### init file
+    typeInitFile = 0  #(0: LM; 1: HM)
     
     ### Parameters for H:C conversion - 2015-09-25
     mHC = 0.8824
@@ -157,7 +160,7 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
         d1d1g = out.best_values['p2_amplitude']/(out.best_values['p2_amplitude']+out.best_values['p5_amplitude'])
         hc = defPar.mHC*d5g + defPar.bHC
         hc2 = defPar.m2HC*d4d5g + defPar.b2HC
-        #hc2 = defPar.m3HC*pow(d4d5g,defPar.b3HC)
+        hc3 = defPar.m3HC*pow(d4d5g,defPar.b3HC)
         wG = out.best_values['p5_sigma']*2
 
     if (processMap == False):
@@ -166,6 +169,7 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
             print('H:C (D5G) = {:f}'.format(hc))
             print('(D4+D5)/G = {:f}'.format(d4d5g))
             print('H:C (D4D5G) = {:f}'.format(hc2))
+            print('H:C - 2 (D4D5G) = {:f}'.format(hc3))
             print('D1/G = {:f}'.format(d1g))
             if type ==0:
                 print('G: {:f}% Gaussian'.format(out.best_values['p5_fraction']*100))
@@ -483,39 +487,37 @@ def genInitPar():
         print(' Input parameter file: ' + defPar.inputParFile + ' already exists\n')
         sys.exit(2)
     else:
-        # high-mat
-        initPar = [('name', 'D4', 'D5', 'D1', 'D3a', 'D3b', 'G', 'D2', 'Base'), \
-            ('activate peak',1,1,1,1,1,1,1,1), \
-            ('center',1160,1250,1330,1400,1450,1590,1710,1080), \
-            ('center min','',1240,'','','','','',''), \
-            ('center max','',1275,'','','','','',''), \
-            ('sigma',20,20,40,20,10,20,10,20), \
-            ('sigma min',10,10,10,10,5,10,5,10), \
-            ('sigma max',50,50,50,50,50,50,40,50), \
-            ('amplitude','','','','','','','',''), \
-            ('ampl. min',0,0,0,0,0,0,0,0), \
-            ('ampl. max','','','','','','','',''), \
-            ('fraction',0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5), \
-            ('fraction min',0,0,0,0,0,0,0,0), \
-            ('fraction max',1,1,1,1,1,1,1,1)]
+        if defPar.typeInitFile == 0:
+            initPar = [('name', 'D4', 'D5', 'D1', 'D3a', 'D3b', 'G', 'D2', 'Base'), \
+                       ('activate peak',1,1,1,1,1,1,1,1), \
+                       ('center',1160,1250,1330,1400,1450,1590,1710,1080), \
+                       ('center min','',1240,'','','','','',''), \
+                       ('center max','',1275,'','','','','',''), \
+                       ('sigma',20,20,40,20,10,20,10,20), \
+                       ('sigma min',10,10,10,10,5,10,5,10), \
+                       ('sigma max',50,50,50,50,50,50,40,50), \
+                       ('amplitude','','','','','','','',''), \
+                       ('ampl. min',0,0,0,0,0,0,0,0), \
+                       ('ampl. max','','','','','','','',''), \
+                       ('fraction',0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5), \
+                       ('fraction min',0,0,0,0,0,0,0,0), \
+                       ('fraction max',1,1,1,1,1,1,1,1)]
             
-        '''
-        # low-mat
-        initPar = [('name', 'D4', 'D5', 'D1', 'D3a', 'D3b', 'G', 'D2'), \
-            ('activate peak',1,1,1,0,1,1,0), \
-            ('center',1160,1250,1330,1400,1470,1590,1680), \
-            ('center min','',1240,'','','','',''), \
-            ('center max','',1275,'','','','',''), \
-            ('sigma',20,20,40,20,10,20,20), \
-            ('sigma min',10,10,10,10,5,10,10), \
-            ('sigma max',50,50,50,50,50,50,50), \
-            ('amplitude','','','','','','',''), \
-            ('ampl. min',0,0,0,0,0,0,0), \
-            ('ampl. max','','','','','','',''), \
-            ('fraction',0.5,0.5,0.5,0.5,0.5,0.5,0.5), \
-            ('fraction min',0,0,0,0,0,0,0), \
-            ('fraction max',1,1,1,1,1,1,1)]
-       '''
+        if defPar.typeInitFile == 1:
+            initPar = [('name', 'D4', 'D5', 'D1', 'D3a', 'D3b', 'G', 'D2'), \
+                       ('activate peak',1,1,1,0,1,1,0), \
+                       ('center',1160,1250,1330,1400,1470,1590,1680), \
+                       ('center min','',1240,'','','','',''), \
+                       ('center max','',1275,'','','','',''), \
+                       ('sigma',20,20,40,20,10,20,20), \
+                       ('sigma min',10,10,10,10,5,10,10), \
+                       ('sigma max',50,50,50,50,50,50,50), \
+                       ('amplitude','','','','','','',''), \
+                       ('ampl. min',0,0,0,0,0,0,0), \
+                       ('ampl. max','','','','','','',''), \
+                       ('fraction',0.5,0.5,0.5,0.5,0.5,0.5,0.5), \
+                       ('fraction min',0,0,0,0,0,0,0), \
+                       ('fraction max',1,1,1,1,1,1,1)]
             
         with open(defPar.inputParFile, "a") as inputFile:
             csv_out=csv.writer(inputFile)
