@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '4-20151104d'
+    version = '4-20151104f'
     ### Define number of total peaks (do not change: this is read from file)
     numPeaks = 0
     ### Name input paramter file
@@ -54,6 +54,11 @@ class defPar:
     ### Parameters for H:C conversion - 2015-09-25
     mHC = 0.8824
     bHC = -0.0575
+    m2HC = 0.5906
+    b2HC = -0.0642
+    m3HC = 0.5719
+    b3HC = 1.5342
+
 
 ####################################################################
 ''' Main routine to perform and plot the fit '''
@@ -151,13 +156,16 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
         d1g = out.best_values['p2_amplitude']/out.best_values['p5_amplitude']
         d1d1g = out.best_values['p2_amplitude']/(out.best_values['p2_amplitude']+out.best_values['p5_amplitude'])
         hc = defPar.mHC*d5g + defPar.bHC
+        hc2 = defPar.m2HC*d4d5g + defPar.b2HC
+        #hc2 = defPar.m3HC*pow(d4d5g,defPar.b3HC)
         wG = out.best_values['p5_sigma']*2
 
     if (processMap == False):
         if (fpeak[1] == 1 & fpeak[2] == 1 & fpeak[5] == 1):
             print('D5/G = {:f}'.format(d5g))
-            print('H:C = {:f}'.format(hc))
+            print('H:C (D5G) = {:f}'.format(hc))
             print('(D4+D5)/G = {:f}'.format(d4d5g))
+            print('H:C (D4D5G) = {:f}'.format(hc2))
             print('D1/G = {:f}'.format(d1g))
             if type ==0:
                 print('G: {:f}% Gaussian'.format(out.best_values['p5_fraction']*100))
@@ -181,7 +189,7 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
 
     ### Write Summary
     summaryFile = [file, \
-            d5g, d4d5g, hc, d1g, d1d1g, \
+            d5g, d4d5g, hc, hc2, d1g, d1d1g, \
             out.best_values['p2_amplitude'], \
             out.best_values['p0_amplitude'], \
             out.best_values['p1_amplitude'], \
@@ -208,10 +216,11 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
         saveMap(file, out, 'D4D5G', d4d5g, x1, y1)
         saveMap(file, out, 'D1G', d1g, x1, y1)
         saveMap(file, out, 'D1GD1', d1d1g, x1, y1)
-        saveMap(file, out, 'HC', hc, x1, y1)
+        saveMap(file, out, 'HC1', hc, x1, y1)
+        saveMap(file, out, 'HC2', hc2, x1, y1)
         saveMap(file, out, 'wG', wG, x1, y1)
-        saveMapMulti(file, out, hc, wG, d5g, d1g, d4d5g, d4d5g+d1g, x1, y1, lab,1)
-        saveMapMulti(file, out, hc, wG, out.best_values['p5_amplitude'], \
+        saveMapMulti(file, out, hc, hc2, wG, d5g, d1g, d4d5g, d4d5g+d1g, x1, y1, lab,1)
+        saveMapMulti(file, out, hc, hc2, wG, out.best_values['p5_amplitude'], \
                      out.best_values['p2_amplitude'], \
                      out.best_values['p1_amplitude'], \
                      out.best_values['p0_amplitude'], x1, y1, lab, 2)
@@ -504,7 +513,7 @@ def genInitPar():
 
 def makeHeaderSummary():
     if os.path.isfile(defPar.summary) == False:
-        summaryHeader = ['File','D5G','(D4+D5)/G','HC','D1/G', 'D1/(D1+G)',
+        summaryHeader = ['File','D5G','(D4+D5)/G','HC','HC2','D1/G', 'D1/(D1+G)',
                          'iD1','iD4','iD5','iG','wG','pG','D5%Gaussian', \
                          'D1%Gaussian','G%Gaussianfit','Chi-square',\
                          'red-chi-sq','Fit-type','Fit-OK','x1','y1', \
