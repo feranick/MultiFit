@@ -139,6 +139,9 @@ This is a known issue.
 Version history:
 ================
 
+v.4: Move back to the original input file format for better compatibility. An input file
+with the same capabilities of v.3 can be created using new flag. New advanced analysis.
+
 v.3: New peak added in init file at 1050 1/cm. This makes it incompatible 
 with previous version
 
