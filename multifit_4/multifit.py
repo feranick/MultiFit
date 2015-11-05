@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '4-20151105c'
+    version = '4-20151105d'
     
     ### init file
     typeInitFile = 0  #(0: LM; 1: HM)
@@ -261,6 +261,8 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
 
 
     else:
+        if(showPlot == False):
+            plt.switch_backend('Agg')
         ### Plot optimal fit and individial components
         fig = plt.figure()
         ax = fig.add_subplot(111)
