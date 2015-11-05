@@ -323,6 +323,10 @@ def main():
         usage()
         sys.exit(2)
 
+    if opts == []:
+        usage()
+        sys.exit(2)
+
     # If parameter file not present, make one
     if not exists(defPar.inputParFile):
         print ('\n Init parameter not found. Generating a new one...')
@@ -576,6 +580,8 @@ def makeHeaderSummary():
 ####################################################################
 
 def usage():
+    print('Copyright 2015 - Nicola Ferralis <feranick@hotmail.com>')
+    print(' Website: https://github.com/feranick/MultiFit\n')
     print('Usage: \n\n Single file:')
     print(' python multifit.py -f filename n\n')
     print(' Batch processing:')
