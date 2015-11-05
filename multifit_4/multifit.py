@@ -19,7 +19,6 @@ from os.path import exists
 from multiprocessing import Pool
 import multiprocessing as mp
 
-
 ####################################################################
 ''' Program definitions and configuration variables '''
 ####################################################################
@@ -261,7 +260,6 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
                      out.best_values['p1_amplitude'], \
                      out.best_values['p0_amplitude'], x1, y1, lab, 2)
 
-
     else:
         if(showPlot == False):
             plt.switch_backend('Agg')
@@ -308,7 +306,6 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
 
     del p
     del out
-
 
 ####################################################################
 ''' Main program '''
@@ -375,7 +372,6 @@ def main():
             rs = readSingleSpectra(file)
             calculate(rs.x, rs.y, '0', '0', file, type, False, True, '')
 
-
         elif o in ("-p", "--plot"):
             if(len(sys.argv) < 3):
                 if(defPar.multiproc == True):
@@ -397,7 +393,6 @@ def main():
                 file = str(sys.argv[2])
                 rs = readSingleSpectra(file)
                 plotData(rs.x, rs.y, file, True)
-
 
         elif o in ("-m", "--map"):
             try:
@@ -437,13 +432,11 @@ def main():
             usage()
             sys.exit(2)
 
-
 ####################################################################
 ''' Class to read map files (Horiba LabSpec5) '''
 ####################################################################
 
 class readMap:
-
     def __init__(self, file):
         try:
             with open(file) as openfile:
@@ -464,7 +457,6 @@ class readMap:
             print(' File: ' + file + ' not found\n')
             sys.exit(2)
 
-
 ####################################################################
 ''' Class to read individual spectra '''
 ####################################################################
@@ -479,7 +471,6 @@ class readSingleSpectra:
         except:
             print(' File: ' + file + ' not found\n')
             sys.exit(2)
-
 
 ####################################################################
 ''' Class to define peaks and their properties '''
@@ -562,7 +553,6 @@ def genInitPar():
 
         print(' Input paramters saved in: ' + defPar.inputParFile)
 
-
 ####################################################################
 ''' Make header, if absent, for the summary file '''
 ####################################################################
@@ -580,7 +570,6 @@ def makeHeaderSummary():
             csv_out=csv.writer(sum_file)
             csv_out.writerow(summaryHeader)
             sum_file.close()
-
 
 ####################################################################
 ''' Lists the program usage '''
@@ -618,7 +607,6 @@ def addBlankLine(file):
     except:
         print ('File busy!')
 
-
 ####################################################################
 ''' Finds data index for a given x value '''
 ####################################################################
@@ -627,7 +615,6 @@ def ix(arrval, value):
     #return index of array *at or below* value
     if value < min(arrval): return 0
     return (where(arrval<=value)[0]).max()
-
 
 ####################################################################
 ''' Convert null or strings into floats '''
@@ -638,7 +625,6 @@ def nulStrConvDigit(x):
         return None
     else:
         return float(x)
-
 
 ####################################################################
 ''' Drawing only routine '''
@@ -714,7 +700,6 @@ def saveMapMulti(file, out, s1, s2, s3, s4, s5, s6, x1, y1, lab, mtype):
         coord_file.write('{:}\n'.format(y1))
         coord_file.close()
 
-
 ####################################################################
 ''' Definition of class map'''
 ####################################################################
@@ -735,8 +720,6 @@ class Map:
     
     def draw(self, file, showplot):
         self.readCoord(file)
-
-
 
 ####################################################################
 ''' Main initialization routine '''
