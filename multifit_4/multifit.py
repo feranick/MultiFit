@@ -23,6 +23,10 @@ import multiprocessing as mp
 ####################################################################
 class defPar:
     version = '4-20151104i'
+    
+    ### init file
+    typeInitFile = 0  #(0: LM; 1: HM)
+    
     ### Define number of total peaks (do not change: this is read from file)
     numPeaks = 0
     ### Name input paramter file
@@ -50,9 +54,6 @@ class defPar:
     dpiPlot = 150
     formatPlot = 0  #png
     #formatPlot = 1  #svg
-    
-    ### init file
-    typeInitFile = 0  #(0: LM; 1: HM)
     
     ### Parameters for H:C conversion - 2015-09-25
     mHC = 0.8824
