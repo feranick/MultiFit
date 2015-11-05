@@ -16,14 +16,16 @@ from lmfit.models import GaussianModel, LorentzianModel, PseudoVoigtModel, Voigt
 import matplotlib.pyplot as plt
 import sys, os.path, getopt, glob, csv
 from os.path import exists
+from os import rename
 from multiprocessing import Pool
 import multiprocessing as mp
+from datetime import datetime, date
 
 ####################################################################
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '4-20151105e'
+    version = '4-20151105g'
     
     ### init file
     typeInitFile = 0  #(0: LM; 1: HM)
@@ -329,8 +331,8 @@ def main():
 
     # If parameter file not present, make one
     if not exists(defPar.inputParFile):
-        print ('\n Init parameter not found. Generating a new one...')
-        genInitPar()
+        print ('\n Input parameter file not found. Generating a new one...')
+        genInitPar(defPar.typeInitFile)
 
     # If summary file is not present, make it and fill header
     makeHeaderSummary()
@@ -430,7 +432,12 @@ def main():
             map.draw(os.path.splitext(file)[0] + '_map.txt', True)
 
         elif o in ("-i", "--input-par"):
-            genInitPar()
+            print (' Generating a new input parameter file...')
+            try:
+                typeIF = sys.argv[2]
+            except:
+                typeIF = defPar.typeInitFile
+            genInitPar(int(typeIF))
 
         else:
             usage()
@@ -512,13 +519,14 @@ class Peak:
 ''' Routine to generate initialization parameter file '''
 ####################################################################
 
-def genInitPar():
-    if exists(defPar.inputParFile):
-        print(' Input parameter file: ' + defPar.inputParFile + ' already exists\n')
-        sys.exit(2)
-    else:
-        if defPar.typeInitFile == 0:
-            initPar = [('name', 'D4', 'D5', 'D1', 'D3a', 'D3b', 'G', 'D2', 'Base'), \
+def genInitPar(typeIF):
+    newParFile = defPar.inputParFile
+    if exists(newParFile):
+        rename(newParFile, newParFile.replace(".csv", str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.csv'))))
+        print(' Input parameters file: ' + defPar.inputParFile + ' already exists. Backing up file.')
+               
+    if typeIF == 0:
+        initPar = [('name', 'D4', 'D5', 'D1', 'D3a', 'D3b', 'G', 'D2', 'Base'), \
                        ('activate peak',1,1,1,1,1,1,1,1), \
                        ('center',1160,1250,1330,1400,1450,1590,1710,1080), \
                        ('center min','',1240,'','','','','',''), \
@@ -533,8 +541,8 @@ def genInitPar():
                        ('fraction min',0,0,0,0,0,0,0,0), \
                        ('fraction max',1,1,1,1,1,1,1,1)]
             
-        if defPar.typeInitFile == 1:
-            initPar = [('name', 'D4', 'D5', 'D1', 'D3a', 'D3b', 'G', 'D2'), \
+    if typeIF == 1:
+        initPar = [('name', 'D4', 'D5', 'D1', 'D3a', 'D3b', 'G', 'D2'), \
                        ('activate peak',1,1,1,0,1,1,0), \
                        ('center',1160,1250,1330,1400,1470,1590,1680), \
                        ('center min','',1240,'','','','',''), \
@@ -549,13 +557,13 @@ def genInitPar():
                        ('fraction min',0,0,0,0,0,0,0), \
                        ('fraction max',1,1,1,1,1,1,1)]
             
-        with open(defPar.inputParFile, "a") as inputFile:
-            csv_out=csv.writer(inputFile)
-            for row in initPar:
-                csv_out.writerow(row)
-            inputFile.close()
+    with open(defPar.inputParFile, "a") as inputFile:
+        csv_out=csv.writer(inputFile)
+        for row in initPar:
+            csv_out.writerow(row)
+        inputFile.close()
 
-        print(' Input paramters saved in: ' + defPar.inputParFile)
+    print(' Input parameters file saved in: ' + defPar.inputParFile + '\n')
 
 ####################################################################
 ''' Make header, if absent, for the summary file '''
@@ -592,7 +600,7 @@ def usage():
     print(' python multifit.py -p filename \n')
     print(' Create and save plot of batch data (no fit): ')
     print(' python multifit.py -p \n')
-    print(' Create new input paramter file (xlsx): ')
+    print(' Create new input paramter file (csv): ')
     print(' python multifit.py -i \n')
     print(' n = 0: PseudoVoigt 1: Gaussian 2: Lorentzian 3: Voigt\n')
     print(' Important note: The first two entries in the map file from Labspec are empty.')
