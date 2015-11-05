@@ -6,10 +6,11 @@
 ### The entire code is covered by GNU Public License (GPL) v.3
 ###=============================================================
 
-### Uncomment this if for headless servers.
-#import matplotlib
-#matplotlib.use('Agg')
 ### ---------------------------------------
+import matplotlib
+if matplotlib.get_backend() == 'TkAgg':
+    matplotlib.use('Agg')
+
 from numpy import *
 from lmfit.models import GaussianModel, LorentzianModel, PseudoVoigtModel, VoigtModel
 import matplotlib.pyplot as plt
@@ -18,11 +19,12 @@ from os.path import exists
 from multiprocessing import Pool
 import multiprocessing as mp
 
+
 ####################################################################
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '4-20151105d'
+    version = '4-20151105e'
     
     ### init file
     typeInitFile = 0  #(0: LM; 1: HM)
@@ -263,6 +265,7 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
     else:
         if(showPlot == False):
             plt.switch_backend('Agg')
+        
         ### Plot optimal fit and individial components
         fig = plt.figure()
         ax = fig.add_subplot(111)

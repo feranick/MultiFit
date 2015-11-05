@@ -32,13 +32,7 @@ where n:
 Fitting parameters are initialized within the
 "input_parameters.csv" Excel file.
 
-
-7. For Headless workstations:
-    uncomment the two lines in multifit.py:
-        import matplotlib
-        matplotlib.use('Agg')
-
-8. Unattended runtime (runs in the background in a headless workstation)
+7. Unattended runtime (runs in the background in a headless workstation)
 
     multifit.py -m filename.txt 0 &>> log.txt &
 
