@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '4-20151104i'
+    version = '4-20151105b'
     
     ### init file
     typeInitFile = 0  #(0: LM; 1: HM)
@@ -63,6 +63,15 @@ class defPar:
     m3HC = 0.5719
     b3HC = 1.5342
 
+    ### dDeltaOrg
+    dDeltaOrg = False  # Enable for Delta delta org
+    dDeltaOrgType = 1  # (1: D5G; 2: D4D5G)
+    
+    dD1 = 4.05
+    dD2 = -3.05
+    dD3 = 0.785
+    dD4 = 0.0165
+    dD5 = -8.79e-4
 
 ####################################################################
 ''' Main routine to perform and plot the fit '''
@@ -163,6 +172,13 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
         hc2 = defPar.m2HC*d4d5g + defPar.b2HC
         hc3 = defPar.m3HC*pow(d4d5g,defPar.b3HC)
         wG = out.best_values['p5_sigma']*2
+        if defPar.dDeltaOrg == True:
+            if defPar.dDeltaOrgType == 1:
+                r_hc = hc
+            if defPar.dDeltaOrgType == 2:
+                r_hc = hc2
+            dDOrg = defPar.dD1 + defPar.dD2*r_hc + defPar.dD3/r_hc + defPar.dD4/(r_hc**2) + defPar.dD5/(r_hc**3)
+
 
     if (processMap == False):
         if (fpeak[1] == 1 & fpeak[2] == 1 & fpeak[5] == 1):
@@ -171,6 +187,13 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
             print('(D4+D5)/G = {:f}'.format(d4d5g))
             print('H:C (D4D5G) = {:f}'.format(hc2))
             print('H:C - 2 (D4D5G) = {:f}'.format(hc3))
+
+            if defPar.dDeltaOrg == True:
+                if defPar.dDeltaOrgType == 1:
+                    print('dDeltaOrg (D5G) = {:f}'.format(dDOrg))
+                if defPar.dDeltaOrgType == 2:
+                    print('dDeltaOrg (D4D5G) = {:f}'.format(dDOrg))
+
             print('D1/G = {:f}'.format(d1g))
             if type ==0:
                 print('G: {:f}% Gaussian'.format(out.best_values['p5_fraction']*100))
@@ -193,14 +216,17 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
             '''
 
     ### Write Summary
+
+
     summaryFile = [file, \
-            d5g, d4d5g, hc, hc2, d1g, d1d1g, \
-            out.best_values['p2_amplitude'], \
-            out.best_values['p0_amplitude'], \
-            out.best_values['p1_amplitude'], \
-            out.best_values['p5_amplitude'], \
-            out.best_values['p5_sigma']*2, \
-            out.best_values['p5_center']]
+        d5g, d4d5g, hc, hc2, d1g, d1d1g, \
+        out.best_values['p2_amplitude'], \
+        out.best_values['p0_amplitude'], \
+        out.best_values['p1_amplitude'], \
+        out.best_values['p5_amplitude'], \
+        out.best_values['p5_sigma']*2, \
+        out.best_values['p5_center']]
+
     if type ==0:
         summaryFile.extend([out.best_values['p1_fraction'], \
                         out.best_values['p2_fraction'], \
@@ -210,6 +236,9 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
             summaryFile.extend([type-1])
     summaryFile.extend([out.chisqr, out.redchi, p.typec, out.success, \
                     x1, y1, lab])
+
+    if defPar.dDeltaOrg == True:
+        summaryFile.extend([dDOrg])
 
     with open(defPar.summary, "a") as sum_file:
         csv_out=csv.writer(sum_file)
@@ -536,10 +565,12 @@ def genInitPar():
 def makeHeaderSummary():
     if os.path.isfile(defPar.summary) == False:
         summaryHeader = ['File','D5G','(D4+D5)/G','HC','HC2','D1/G', 'D1/(D1+G)',
-                         'iD1','iD4','iD5','iG','wG','pG','D5%Gaussian', \
-                         'D1%Gaussian','G%Gaussianfit','Chi-square',\
-                         'red-chi-sq','Fit-type','Fit-OK','x1','y1', \
-                         'label']
+            'iD1','iD4','iD5','iG','wG','pG','D5%Gaussian', \
+            'D1%Gaussian','G%Gaussianfit','Chi-square',\
+            'red-chi-sq','Fit-type','Fit-OK','x1','y1', \
+            'label']
+        if defPar.dDeltaOrg == True:
+            summaryHeader.extend(['dDeltaOrg'])
         with open(defPar.summary, "a") as sum_file:
             csv_out=csv.writer(sum_file)
             csv_out.writerow(summaryHeader)
