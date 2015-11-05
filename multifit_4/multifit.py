@@ -523,7 +523,7 @@ def genInitPar(typeIF):
     newParFile = defPar.inputParFile
     if exists(newParFile):
         rename(newParFile, newParFile.replace(".csv", str(datetime.now().strftime('_%Y-%m-%d_%H-%M-%S.csv'))))
-        print(' Input parameters file: ' + defPar.inputParFile + ' already exists. Backing up file.')
+        print(' Input parameter file: ' + defPar.inputParFile + ' already exists. Backing up file.')
                
     if typeIF == 0:
         initPar = [('name', 'D4', 'D5', 'D1', 'D3a', 'D3b', 'G', 'D2', 'Base'), \
@@ -563,7 +563,7 @@ def genInitPar(typeIF):
             csv_out.writerow(row)
         inputFile.close()
 
-    print(' Input parameters file saved in: ' + defPar.inputParFile + '\n')
+    print(' Input parameter file saved in: ' + defPar.inputParFile + '\n')
 
 ####################################################################
 ''' Make header, if absent, for the summary file '''
@@ -600,7 +600,7 @@ def usage():
     print(' python multifit.py -p filename \n')
     print(' Create and save plot of batch data (no fit): ')
     print(' python multifit.py -p \n')
-    print(' Create new input paramter file (csv): ')
+    print(' Create new input parameter file (csv): ')
     print(' python multifit.py -i \n')
     print(' n = 0: PseudoVoigt 1: Gaussian 2: Lorentzian 3: Voigt\n')
     print(' Important note: The first two entries in the map file from Labspec are empty.')
