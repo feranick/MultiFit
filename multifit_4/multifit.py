@@ -22,7 +22,7 @@ import multiprocessing as mp
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '4-20151105b'
+    version = '4-20151105c'
     
     ### init file
     typeInitFile = 0  #(0: LM; 1: HM)
@@ -301,8 +301,8 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
             plt.show()
         plt.close()
 
-        del p
-        del out
+    del p
+    del out
 
 
 ####################################################################
