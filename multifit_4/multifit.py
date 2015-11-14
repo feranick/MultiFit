@@ -25,7 +25,7 @@ from datetime import datetime, date
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '4-20151105g'
+    version = '4-20151114a'
     
     ### init file
     typeInitFile = 0  #(0: LM; 1: HM)
@@ -59,6 +59,7 @@ class defPar:
     #formatPlot = 1  #svg
     
     ### Parameters for H:C conversion - 2015-09-25
+    ### Excitation energy: 633 nm
     mHC = 0.8824
     bHC = -0.0575
     m2HC = 0.5906
@@ -590,6 +591,7 @@ def makeHeaderSummary():
 def usage():
     print('Copyright 2015 - Nicola Ferralis <feranick@hotmail.com>')
     print(' Website: https://github.com/feranick/MultiFit\n')
+    print(' Supported excitation energies: 633 nm\n')
     print('Usage: \n\n Single file:')
     print(' python multifit.py -f filename n\n')
     print(' Batch processing:')

@@ -1,6 +1,13 @@
 # MultiFit
 Software for multipeak fitting Raman Spectra of Carbon Materials
 
+Note
+=====
+
+This software currently supports only these exitation energies:
+- 633 nm
+
+
 Usage 
 ======
 (note the correct use of flags): 
