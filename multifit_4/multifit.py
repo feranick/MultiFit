@@ -25,7 +25,7 @@ from datetime import datetime, date
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '4-20151114a'
+    version = '4-20151121a'
     
     ### init file
     typeInitFile = 0  #(0: LM; 1: HM)
@@ -60,12 +60,12 @@ class defPar:
     
     ### Parameters for H:C conversion - 2015-09-25
     ### Excitation energy: 633 nm
-    mHC = 0.8824
-    bHC = -0.0575
-    m2HC = 0.5906
-    b2HC = -0.0642
-    m3HC = 0.5719
-    b3HC = 1.5342
+    mHC = 0.874
+    bHC = -0.0526
+    m2HC = 0.6012
+    b2HC = -0.0729
+    m3HC = 0.5657
+    b3HC = 1.5036
 
     ### dDeltaOrg
     dDeltaOrg = False  # Enable for Delta delta org
