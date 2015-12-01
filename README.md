@@ -7,6 +7,7 @@ Note
 This software currently supports only these exitation energies:
 - 633 nm
 
+More will be supported in the future.
 
 Usage 
 ======
