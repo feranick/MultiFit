@@ -25,7 +25,7 @@ from datetime import datetime, date
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '4-20151121a'
+    version = '4-20160115a'
     
     ### init file
     typeInitFile = 0  #(0: LM; 1: HM)
@@ -67,15 +67,15 @@ class defPar:
     m3HC = 0.5657
     b3HC = 1.5036
 
-    ### dDeltaOrg
+    ### dDeltaOrg correction
+    ### Based on Des Marais, Org. GeoChem. (1997) 27:185-193
     dDeltaOrg = False  # Enable for Delta delta org
     dDeltaOrgType = 1  # (1: D5G; 2: D4D5G)
     
-    dD1 = 4.05
-    dD2 = -3.05
-    dD3 = 0.785
-    dD4 = 0.0165
-    dD5 = -8.79e-4
+    dD1 = 4.2
+    dD2 = -11.9
+    dD3 = 11.1
+    dD4 = -3.4
 
 ####################################################################
 ''' Main routine to perform and plot the fit '''
@@ -181,7 +181,7 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
                 r_hc = hc
             if defPar.dDeltaOrgType == 2:
                 r_hc = hc2
-            dDOrg = defPar.dD1 + defPar.dD2*r_hc + defPar.dD3/r_hc + defPar.dD4/(r_hc**2) + defPar.dD5/(r_hc**3)
+            dDOrg = defPar.dD1 + defPar.dD2*r_hc + defPar.dD3*(r_hc**2) + defPar.dD4*(r_hc**3)
 
 
     if (processMap == False):
