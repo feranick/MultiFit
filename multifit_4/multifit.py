@@ -25,7 +25,7 @@ from datetime import datetime, date
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '4-20160115a'
+    version = '4-20160127a'
     
     ### init file
     typeInitFile = 0  #(0: LM; 1: HM)
@@ -58,12 +58,12 @@ class defPar:
     formatPlot = 0  #png
     #formatPlot = 1  #svg
     
-    ### Parameters for H:C conversion - 2015-09-25
+    ### Parameters for H:C conversion - 2016-01-16
     ### Excitation energy: 633 nm
-    mHC = 0.874
-    bHC = -0.0526
-    m2HC = 0.6012
-    b2HC = -0.0729
+    mHC = 0.871
+    bHC = -0.0508
+    m2HC = 0.6024
+    b2HC = -0.0739
     m3HC = 0.5657
     b3HC = 1.5036
 
