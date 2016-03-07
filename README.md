@@ -28,19 +28,23 @@ Usage
 5. Create and save plot batch data (no fitting):
 ./multifit.py -p
 
-6. Create new input paramter file (csv)
-./multifit.py -i
-
 where n:
     0: PseudoVoigt
     1: Gaussian
     2: Lorentzian
     3. Voigt
 
+
+6. FFT filtering background subtraction
+./multifit.py -bs filename cutoff
+
+7. Create new input paramter file (csv)
+./multifit.py -i
+
 Fitting parameters are initialized within the
 "input_parameters.csv" Excel file.
 
-7. Unattended runtime (runs in the background in a headless workstation)
+8. Unattended runtime (runs in the background in a headless workstation)
 
     multifit.py -m filename.txt 0 &>> log.txt &
 
@@ -140,6 +144,9 @@ This is a known issue.
 
 Version history:
 ================
+
+v.5: Added functionality: background subtraction via high bandpass FFT filtering for
+correcting high florescence spectra.
 
 v.4: Move back to the original input file format for better compatibility. An input file
 with the same capabilities of v.3 can be created using new flag. New advanced analysis.
