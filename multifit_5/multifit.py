@@ -25,7 +25,7 @@ from datetime import datetime, date
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '5-20160307b-exp'
+    version = '5-20160310a-exp'
     
     ### init file
     typeInitFile = 0  #(0: LM; 1: HM)
@@ -324,7 +324,7 @@ def main():
     print('******************************')
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "bftmitph:", ["batch", "file", "bs","type", "map", "input-par", "test", "plot", "help"])
+        opts, args = getopt.getopt(sys.argv[1:], "bfmipch:", ["batch", "file", "bs","type", "map", "input-par", "plot", "help"])
     except getopt.GetoptError:
         # print help information and exit:
         usage()
@@ -383,7 +383,7 @@ def main():
             rs = readSingleSpectra(file)
             calculate(rs.x, rs.y, '0', '0', file, type, False, True, '')
 
-        elif o in ("-bs", "--bs"):
+        elif o in ("-c", "--bs"):
             try:
                 cutoff = str(sys.argv[3])
             except:
@@ -441,13 +441,7 @@ def main():
                 for i in range (1, rm.num_lines):
                     calculate(rm.x, rm.y[i], rm.x1[i], rm.y1[i], file, type, True, False, i)
                 #map.draw(os.path.splitext(file)[0] + '_map.txt', True)
-
-        elif o in ("-t", "--test"):
-            file = str(sys.argv[2])
-            map = Map()
-            #map.readCoord(os.path.splitext(file)[0] + '_map.txt')
-            map.draw(os.path.splitext(file)[0] + '_map.txt', True)
-
+        
         elif o in ("-i", "--input-par"):
             print (' Generating a new input parameter file...')
             try:
@@ -622,7 +616,7 @@ def usage():
     print(' - Create new input parameter file (csv): ')
     print(' python multifit.py -i \n')
     print(' - FFT filtering background subtraction: ')
-    print(' python multifit.py -bs filename cutoff')
+    print(' python multifit.py -c filename cutoff')
     print(' (suggested cutoff: ' + str(defPar.FFTcutoff) + ')\n')
     
     print(' Important note: The first two entries in the map file from Labspec are empty.')

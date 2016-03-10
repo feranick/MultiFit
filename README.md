@@ -36,7 +36,7 @@ where n:
 
 
 6. FFT filtering background subtraction
-./multifit.py -bs filename cutoff
+./multifit.py -c filename cutoff
 
 7. Create new input paramter file (csv)
 ./multifit.py -i
