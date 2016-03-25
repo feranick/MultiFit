@@ -159,3 +159,9 @@ is at 1140 1/cm
 
 v.1: It uses a static initialization for the fitting parameters
 
+Known Issues
+============
+
+lmfit version 0.9 and 0.9.2 introduced a bug where parameters for PseudoVoigt fits are 
+missing, generating an error in MultiFit as a result. The bug has been fixed in git for 
+lmfit, and in its next public release. For now it's recommended to use lmfit 0.8.2.
