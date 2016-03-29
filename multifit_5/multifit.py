@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 ###=============================================================
-### Multifit 4
+### Multifit 5
 ### Nicola Ferralis <feranick@hotmail.com>
 ### The entire code is covered by GNU Public License (GPL) v.3
 ###=============================================================
@@ -25,7 +25,7 @@ from datetime import datetime, date
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '5-20160310a-exp'
+    version = '5-20160329'
     
     ### init file
     typeInitFile = 0  #(0: LM; 1: HM)
@@ -57,6 +57,10 @@ class defPar:
     dpiPlot = 150
     formatPlot = 0  #png
     #formatPlot = 1  #svg
+    custAspRatio = False
+    xAspRatio = 10
+    yAspRatio = 3
+    padAspRatio = 1.3
     
     ### Parameters for H:C conversion - 2016-01-16
     ### Excitation energy: 633 nm
@@ -272,9 +276,15 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
             plt.switch_backend('Agg')
         
         ### Plot optimal fit and individial components
-        fig = plt.figure()
+        if(defPar.custAspRatio == False):
+            fig = plt.figure()
+        else:
+            fig = plt.figure(figsize=(defPar.xAspRatio,defPar.yAspRatio))
         ax = fig.add_subplot(111)
         ax.plot(x, y, label='data')
+        if(defPar.custAspRatio == True):
+            plt.tight_layout(pad=1.3)
+
         if(defPar.initCurve == True):
             ax.plot(x, init, 'k--', label='initial')
         
