@@ -167,4 +167,4 @@ missing, generating an error in MultiFit as a result. The bug has been fixed in 
 for lmfit. If your distribution has not yet been updated, you can update it manually using 
 pip:
 
-sudo pip install --upgrade lmfit
+	sudo pip install --upgrade lmfit
