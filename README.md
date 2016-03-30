@@ -163,5 +163,8 @@ Known Issues
 ============
 
 lmfit version 0.9 and 0.9.2 introduced a bug where parameters for PseudoVoigt fits are 
-missing, generating an error in MultiFit as a result. The bug has been fixed in git for 
-lmfit, and in its next public release. For now it's recommended to use lmfit 0.8.2.
+missing, generating an error in MultiFit as a result. The bug has been fixed in version 9.3 
+for lmfit. If your distribution has not yet been updated, you can update it manually using 
+pip:
+
+sudo pip install --upgrade lmfit
