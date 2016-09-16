@@ -1,12 +1,16 @@
 #! /usr/bin/env python
+# -*- coding: utf-8 -*-
+'''
+=============================================================
+ Multifit 5 (version: 5-20160916a)
+ 
+ (2015-2016) Nicola Ferralis <feranick@hotmail.com>
+ 
+ The entire code is covered by GNU Public License (GPL) v.3
+=============================================================
+'''
+print(__doc__)
 
-###=============================================================
-### Multifit 5
-### Nicola Ferralis <feranick@hotmail.com>
-### The entire code is covered by GNU Public License (GPL) v.3
-###=============================================================
-
-### ---------------------------------------
 import matplotlib
 if matplotlib.get_backend() == 'TkAgg':
     matplotlib.use('Agg')
@@ -25,8 +29,6 @@ from datetime import datetime, date
 ''' Program definitions and configuration variables '''
 ####################################################################
 class defPar:
-    version = '5-20160329'
-    
     ### init file
     typeInitFile = 0  #(0: LM; 1: HM)
     
@@ -329,10 +331,6 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
 ####################################################################
 
 def main():
-    print('\n******************************')
-    print(' MultiFit v.' + defPar.version)
-    print('******************************')
-
     try:
         opts, args = getopt.getopt(sys.argv[1:], "bfmipch:", ["batch", "file", "bs","type", "map", "input-par", "plot", "help"])
     except getopt.GetoptError:
@@ -609,7 +607,6 @@ def makeHeaderSummary():
 ####################################################################
 
 def usage():
-    print('Copyright 2015-2016 - Nicola Ferralis <feranick@hotmail.com>')
     print(' Website: https://github.com/feranick/MultiFit\n')
     print(' Supported excitation energies: 633 nm\n')
     print('Usage: \n\n - Single file:')
