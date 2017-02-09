@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 '''
 =============================================================
- Multifit 5 (version: 5-20160916a)
+ Multifit 5 (version: 5-20170109a)
  
- (2015-2016) Nicola Ferralis <feranick@hotmail.com>
+ (2015-2017) Nicola Ferralis <feranick@hotmail.com>
  
  The entire code is covered by GNU Public License (GPL) v.3
 =============================================================
@@ -302,9 +302,8 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
                 else:
                     ax.plot(x,y[i],'g')
 
-        ax.text(0.05, 0.875, 'Fit type: {:}\nD5/G = {:f}\nRed. Chi sq: {:}'.format( \
-                                p.typec, \
-                                d5g, out.redchi), transform=ax.transAxes)
+        ax.text(0.01, 0.82, 'Fit type: {:}\nH:C (D5/G) = {:f}\nH:C (D4D5/G) = {:f}\nRed. Chi sq: {:}'.format( \
+                                p.typec, hc, hc2, out.redchi), transform=ax.transAxes)
 
         plt.xlabel('Raman shift [1/cm]')
         plt.ylabel('Intensity [arb. units]')
