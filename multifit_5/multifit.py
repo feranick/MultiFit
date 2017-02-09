@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 '''
 =============================================================
- Multifit 5 (version: 5-20170109a)
+ Multifit 5 (version: 5-20170109b)
  
  (2015-2017) Nicola Ferralis <feranick@hotmail.com>
  
@@ -75,7 +75,7 @@ class defPar:
 
     ### dDeltaOrg correction
     ### Based on Des Marais, Org. GeoChem. (1997) 27:185-193
-    dDeltaOrg = False  # Enable for Delta delta org
+    dDeltaOrg = True  # Enable for Delta delta org
     dDeltaOrgType = 1  # (1: D5G; 2: D4D5G)
     
     dD1 = 4.2
@@ -196,24 +196,21 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
 
     if (processMap == False):
         if (fpeak[1] == 1 & fpeak[2] == 1 & fpeak[5] == 1):
-            print('D5/G = {:f}'.format(d5g))
-            print('H:C (D5G) = {:f}'.format(hc))
-            print('(D4+D5)/G = {:f}'.format(d4d5g))
-            print('H:C (D4D5G) = {:f}'.format(hc2))
-            print('H:C - 2 (D4D5G) = {:f}'.format(hc3))
+            print('Fit type: {:}'.format(p.typec))
+            print('Reduced Chi-square: {0:.2f} - Chi-square: {1:.2f}'.format(out.redchi, out.chisqr))
+            print('\n H:C = {0:.3f} - D5/G = {1:.3f}'.format(hc, d5g))
+            print(' H:C = {0:.3f} - (D4+D5)/G = {1:.3f}\n'.format(hc2, d4d5g))
+            #print(' H:C - 2 (D4D5G) = {:.3f}'.format(hc3))
 
             if defPar.dDeltaOrg == True:
                 if defPar.dDeltaOrgType == 1:
-                    print('dDeltaOrg (D5G) = {:f}'.format(dDOrg))
+                    print(' dDeltaOrg (D5G) = {:f}\n'.format(dDOrg))
                 if defPar.dDeltaOrgType == 2:
-                    print('dDeltaOrg (D4D5G) = {:f}'.format(dDOrg))
+                    print(' dDeltaOrg (D4D5G) = {:f}\n'.format(dDOrg))
 
-            print('D1/G = {:f}'.format(d1g))
             if type ==0:
-                print('G: {:f}% Gaussian'.format(out.best_values['p5_fraction']*100))
-            print('Fit type: {:}'.format(p.typec))
-            print('Chi-square: {:}'.format(out.chisqr))
-            print('Reduced Chi-square: {:}\n'.format(out.redchi))
+                print(' G: {:.1f}% Gaussian'.format(out.best_values['p5_fraction']*100))
+            print(' D1/G = {:.3f}\n'.format(d1g))
 
             ### Uncomment to enable saving results of each fit in a separate file.
             '''
@@ -302,7 +299,7 @@ def calculate(x, y, x1, y1, file, type, processMap, showPlot, lab):
                 else:
                     ax.plot(x,y[i],'g')
 
-        ax.text(0.01, 0.82, 'Fit type: {:}\nH:C (D5/G) = {:f}\nH:C (D4D5/G) = {:f}\nRed. Chi sq: {:}'.format( \
+        ax.text(0.01, 0.82, "Fit type: {0:s}\nH:C (D5/G) = {1:.3f}\nH:C (D4D5/G) = {2:.3f}\nRed. Chi sq: {3:.2f}".format( \
                                 p.typec, hc, hc2, out.redchi), transform=ax.transAxes)
 
         plt.xlabel('Raman shift [1/cm]')
