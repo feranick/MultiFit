@@ -1,6 +1,8 @@
 # MultiFit
 Software for multipeak fitting Raman Spectra of Carbon Materials
 
+Reference: N. Ferralis et al. Carbon 108 (2016), 440-449.
+
 Note
 =====
 
